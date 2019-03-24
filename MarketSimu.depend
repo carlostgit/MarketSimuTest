@@ -1,0 +1,333 @@
+# depslib dependency file v1.0
+1551304590 source:d:\proyectomarket\marketsimu2\marketsimu2\stock.cpp
+	"Stock.h"
+	<limits>
+	<assert.h>
+	<iostream>
+	<cmath>
+
+1551302570 d:\proyectomarket\marketsimu2\marketsimu2\stock.h
+	"Defines.h"
+	<map>
+	<vector>
+
+1551304124 d:\proyectomarket\marketsimu2\marketsimu2\defines.h
+	<map>
+	<string>
+	<vector>
+
+1541270356 source:d:\proyectomarket\marketsimu2\marketsimu2\transactioninfo.cpp
+	"TransactionInfo.h"
+
+1551482788 d:\proyectomarket\marketsimu2\marketsimu2\transactioninfo.h
+	"Stock.h"
+
+1541871350 source:d:\proyectomarket\marketsimu2\marketsimu2\products.cpp
+	"Products.h"
+
+1541871350 d:\proyectomarket\marketsimu2\marketsimu2\products.h
+	"defines.h"
+	<vector>
+
+1552951310 source:d:\proyectomarket\marketsimu2\marketsimu2\ledger.cpp
+	"Ledger.h"
+	"TransactionInfo.h"
+	"Market.h"
+	"Participant.h"
+	"Tester.h"
+
+1552951310 d:\proyectomarket\marketsimu2\marketsimu2\ledger.h
+	"Stock.h"
+	"PricesInfo.h"
+	<vector>
+	<map>
+	<memory>
+
+1550943972 source:d:\proyectomarket\marketsimu2\marketsimu2\tester.cpp
+	"Tester.h"
+	<iostream>
+	"Stock.h"
+	"Participant.h"
+	"PricesInfo.h"
+	"Market.h"
+	"TransactionInfo.h"
+	<cmath>
+	<iostream>
+	<fstream>
+	<string>
+	<regex>
+	<iterator>
+	<iomanip>
+	<algorithm>
+	<FL/Fl.H>
+	<FL/Fl_Window.H>
+	<FL/Fl_Box.H>
+	<FL/Fl_Chart.H>
+	<FL/Fl_Group.H>
+	<FL/Fl_Output.H>
+	<FL/Fl_Input.H>
+	<FL/Fl_Button.H>
+	<chrono>
+	<memory>
+	<tuple>
+
+1549922034 d:\proyectomarket\marketsimu2\marketsimu2\tester.h
+	"Defines.h"
+	<vector>
+	<string>
+
+1550876210 source:d:\proyectomarket\marketsimu2\marketsimu2\prices.cpp
+	"Prices.h"
+	<assert.h>
+
+1550876210 d:\proyectomarket\marketsimu2\marketsimu2\prices.h
+	<map>
+	"Defines.h"
+
+1551655260 source:d:\proyectomarket\marketsimu2\marketsimu2\participant.cpp
+	"Participant.h"
+	"Stock.h"
+	"PricesInfo.h"
+	<algorithm>
+	<iostream>
+	<fstream>
+	"Tester.h"
+
+1552931440 d:\proyectomarket\marketsimu2\marketsimu2\participant.h
+	"Defines.h"
+	"Stock.h"
+	<map>
+	<assert.h>
+
+1551538904 d:\proyectomarket\marketsimu2\marketsimu2\pricesinfo.h
+	"Defines.h"
+	"Stock.h"
+
+1551538978 source:d:\proyectomarket\marketsimu2\marketsimu2\pricesinfo.cpp
+	"PricesInfo.h"
+	<limits>
+	<iostream>
+	"Prices.h"
+
+1552237128 source:d:\proyectomarket\marketsimu2\marketsimu2\main.cpp
+	<iostream>
+	"defines.h"
+	"Market.h"
+	"Participant.h"
+	"PricesInfo.h"
+	"Tester.h"
+	"MainDialog.h"
+
+1551486552 source:d:\proyectomarket\marketsimu2\marketsimu2\market.cpp
+	"Market.h"
+	"PricesInfo.h"
+	"Products.h"
+	"Stock.h"
+	"Prices.h"
+	"Ledger.h"
+	"TransactionInfo.h"
+	"Participant.h"
+	"Tester.h"
+	<limits>
+	<assert.h>
+	<iostream>
+	<cmath>
+	<chrono>
+
+1553284260 d:\proyectomarket\marketsimu2\marketsimu2\market.h
+	<vector>
+	<memory>
+	"Ledger.h"
+	"PricesInfo.h"
+
+1553298540 source:d:\proyectomarket\marketsimu2\marketsimu2\maindialog.cpp
+	"MainDialog.h"
+	<iostream>
+	<set>
+	<FL/Fl.H>
+	<FL/Fl_Window.H>
+	<FL/Fl_Box.H>
+	<FL/Fl_Chart.H>
+	<FL/Fl_Group.H>
+	<FL/Fl_Output.H>
+	<FL/Fl_Input.H>
+	<FL/Fl_Counter.H>
+	<FL/Fl_Button.H>
+	<FL/Fl_Check_Button.h>
+	"Market.h"
+	"Participant.h"
+	"PricesInfo.h"
+	"Ledger.h"
+
+1553209804 d:\proyectomarket\marketsimu2\marketsimu2\maindialog.h
+	"defines.h"
+	<vector>
+	<map>
+	<memory>
+
+1552951310 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\ledger.cpp
+	"Ledger.h"
+	"TransactionInfo.h"
+	"Market.h"
+	"Participant.h"
+	"Tester.h"
+
+1552951310 d:\proyectomarket\marketsimu2\marketsimu2 - copia\ledger.h
+	"Stock.h"
+	"PricesInfo.h"
+	<vector>
+	<map>
+	<memory>
+
+1551302570 d:\proyectomarket\marketsimu2\marketsimu2 - copia\stock.h
+	"Defines.h"
+	<map>
+	<vector>
+
+1551304124 d:\proyectomarket\marketsimu2\marketsimu2 - copia\defines.h
+	<map>
+	<string>
+	<vector>
+
+1551538904 d:\proyectomarket\marketsimu2\marketsimu2 - copia\pricesinfo.h
+	"Defines.h"
+	"Stock.h"
+
+1551482788 d:\proyectomarket\marketsimu2\marketsimu2 - copia\transactioninfo.h
+	"Stock.h"
+
+1553284260 d:\proyectomarket\marketsimu2\marketsimu2 - copia\market.h
+	<vector>
+	<memory>
+	"Ledger.h"
+	"PricesInfo.h"
+
+1552931440 d:\proyectomarket\marketsimu2\marketsimu2 - copia\participant.h
+	"Defines.h"
+	"Stock.h"
+	<map>
+	<assert.h>
+
+1549922034 d:\proyectomarket\marketsimu2\marketsimu2 - copia\tester.h
+	"Defines.h"
+	<vector>
+	<string>
+
+1552237128 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\main.cpp
+	<iostream>
+	"defines.h"
+	"Market.h"
+	"Participant.h"
+	"PricesInfo.h"
+	"Tester.h"
+	"MainDialog.h"
+
+1553209804 d:\proyectomarket\marketsimu2\marketsimu2 - copia\maindialog.h
+	"defines.h"
+	<vector>
+	<map>
+	<memory>
+
+1553302944 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\maindialog.cpp
+	"MainDialog.h"
+	<iostream>
+	<set>
+	<FL/Fl.H>
+	<FL/Fl_Window.H>
+	<FL/Fl_Box.H>
+	<FL/Fl_Chart.H>
+	<FL/Fl_Group.H>
+	<FL/Fl_Output.H>
+	<FL/Fl_Input.H>
+	<FL/Fl_Counter.H>
+	<FL/Fl_Button.H>
+	<FL/Fl_Check_Button.h>
+	"Market.h"
+	"Participant.h"
+	"PricesInfo.h"
+	"Ledger.h"
+
+1551486552 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\market.cpp
+	"Market.h"
+	"PricesInfo.h"
+	"Products.h"
+	"Stock.h"
+	"Prices.h"
+	"Ledger.h"
+	"TransactionInfo.h"
+	"Participant.h"
+	"Tester.h"
+	<limits>
+	<assert.h>
+	<iostream>
+	<cmath>
+	<chrono>
+
+1541871350 d:\proyectomarket\marketsimu2\marketsimu2 - copia\products.h
+	"defines.h"
+	<vector>
+
+1550876210 d:\proyectomarket\marketsimu2\marketsimu2 - copia\prices.h
+	<map>
+	"Defines.h"
+
+1551655260 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\participant.cpp
+	"Participant.h"
+	"Stock.h"
+	"PricesInfo.h"
+	<algorithm>
+	<iostream>
+	<fstream>
+	"Tester.h"
+
+1550876210 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\prices.cpp
+	"Prices.h"
+	<assert.h>
+
+1551538978 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\pricesinfo.cpp
+	"PricesInfo.h"
+	<limits>
+	<iostream>
+	"Prices.h"
+
+1541871350 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\products.cpp
+	"Products.h"
+
+1551304590 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\stock.cpp
+	"Stock.h"
+	<limits>
+	<assert.h>
+	<iostream>
+	<cmath>
+
+1550943972 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\tester.cpp
+	"Tester.h"
+	<iostream>
+	"Stock.h"
+	"Participant.h"
+	"PricesInfo.h"
+	"Market.h"
+	"TransactionInfo.h"
+	<cmath>
+	<iostream>
+	<fstream>
+	<string>
+	<regex>
+	<iterator>
+	<iomanip>
+	<algorithm>
+	<FL/Fl.H>
+	<FL/Fl_Window.H>
+	<FL/Fl_Box.H>
+	<FL/Fl_Chart.H>
+	<FL/Fl_Group.H>
+	<FL/Fl_Output.H>
+	<FL/Fl_Input.H>
+	<FL/Fl_Button.H>
+	<chrono>
+	<memory>
+	<tuple>
+
+1541270356 source:d:\proyectomarket\marketsimu2\marketsimu2 - copia\transactioninfo.cpp
+	"TransactionInfo.h"
+

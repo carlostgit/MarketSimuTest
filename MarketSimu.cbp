@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="MarketSimu" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/MarketSimu2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add directory="D:/Fltk/fltk-1.3.4-2/lib" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/MarketSimu2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add option="-O3" />
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c++11" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Linker>
+			<Add option="-static-libstdc++" />
+			<Add option="-static-libgcc" />
+			<Add option="-static" />
+		</Linker>
+		<Unit filename="DEFINES.H" />
+		<Unit filename="LEDGER.CPP" />
+		<Unit filename="LEDGER.H" />
+		<Unit filename="MARKET.CPP" />
+		<Unit filename="MARKET.H" />
+		<Unit filename="MainDialog.cpp" />
+		<Unit filename="MainDialog.h" />
+		<Unit filename="PRICES.CPP" />
+		<Unit filename="PRICES.H" />
+		<Unit filename="PRODUCTS.CPP" />
+		<Unit filename="PRODUCTS.H" />
+		<Unit filename="Participant.cpp" />
+		<Unit filename="Participant.h" />
+		<Unit filename="PricesInfo.cpp" />
+		<Unit filename="PricesInfo.h" />
+		<Unit filename="STOCK.CPP" />
+		<Unit filename="STOCK.H" />
+		<Unit filename="TESTER.CPP" />
+		<Unit filename="TESTER.H" />
+		<Unit filename="TransactionInfo.cpp" />
+		<Unit filename="TransactionInfo.h" />
+		<Unit filename="main.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
