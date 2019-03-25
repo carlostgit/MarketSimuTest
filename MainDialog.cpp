@@ -52,56 +52,73 @@ void CMainDialog::NumPartUpdated(Fl_Widget* w)
     std::cout << "NumPartUpdated" << std::endl;
 
 
-    Fl_Group* pPartValuesGroupNew = new Fl_Group(700,360,100,500);
+    Fl_Group* pPartValuesGroupNew = new Fl_Group(700,20,200,800);
 
 
-    std::map<std::pair<int,def::eProduct>,Fl_Counter*> mapPart_Prod_cbShow_New;
+    std::map<std::pair<int,def::eProduct>,Fl_Counter*> newmapPart_Prod_InitStockCounter;
+    std::map<std::pair<int,def::eProduct>,Fl_Counter*> newmapPart_Prod_ProductionCounter;
 
     long nYLast=20;
     int nPart=m_pCounterNumPartValue->value();
     for(int iPart=0;iPart<nPart;iPart++)
     {
+
         for(auto& prod:def::vProducts)
         {
 
-            std::cout << "Part prod" << iPart << prod << std::endl;
-            if(m_mapPart_Prod_cbShow.end()==m_mapPart_Prod_cbShow.find(std::make_pair(iPart,static_cast<def::eProduct>(prod))))
+
+            //Init Amounts
+            Fl_Counter* pCountInit = new Fl_Counter(700,nYLast,100,20);
+
+            pCountInit->value(2.0);
+
+            if(m_mapPart_Prod_InitStockCounter.end()!=m_mapPart_Prod_InitStockCounter.find(std::make_pair(iPart,static_cast<def::eProduct>(prod))))
             {
-
-                Fl_Counter* pCount = new Fl_Counter(700,nYLast,100,20);
-                nYLast = pCount->y()+pCount->h()+20;
-                pCount->value(2.0);
-
-                std::string sName=std::to_string(iPart)+ " " +def::mapeProductNames.at(prod);
-                m_map_pairPartProd_Name[std::make_pair(iPart,prod)]=sName;
-                pCount->label(m_map_pairPartProd_Name.at(std::make_pair(iPart,prod)).c_str());
-
-                pPartValuesGroupNew->add(pCount);
-                std::cout << "1 m_mapPart_Prod_cbShow.size()" << m_mapPart_Prod_cbShow.size() << std::endl;
-                mapPart_Prod_cbShow_New[std::make_pair(iPart,static_cast<def::eProduct>(prod))] = pCount;
+                Fl_Counter* pCountOld = m_mapPart_Prod_InitStockCounter.at(std::make_pair(iPart,static_cast<def::eProduct>(prod)));
+                pCountInit->value(pCountOld->value());
             }
-            else
+
+            std::string sName=std::to_string(iPart)+ " " +def::mapeProductNames.at(prod);
+            m_map_pairPartProd_Name[std::make_pair(iPart,prod)]=sName;
+            pCountInit->label(m_map_pairPartProd_Name.at(std::make_pair(iPart,prod)).c_str());
+
+            pPartValuesGroupNew->add(pCountInit);
+
+            newmapPart_Prod_InitStockCounter[std::make_pair(iPart,static_cast<def::eProduct>(prod))] = pCountInit;
+            //
+
+            //Production Amounts
+            Fl_Counter* pCountProd = new Fl_Counter(800,nYLast,100,20);
+            //nYLast = pCountProd->y()+pCountProd->h()+20;
+            pCountProd->value(2.0);
+
+            if(m_mapPart_Prod_ProductionCounter.end()!=m_mapPart_Prod_ProductionCounter.find(std::make_pair(iPart,static_cast<def::eProduct>(prod))))
             {
-                std::cout << "m_mapPart_Prod_cbShow.size()" << m_mapPart_Prod_cbShow.size() << std::endl;
-                Fl_Counter* pCountOld = m_mapPart_Prod_cbShow.at(std::make_pair(iPart,static_cast<def::eProduct>(prod)));
-
-                Fl_Counter* pCount = new Fl_Counter(700,nYLast,100,20);
-                nYLast = pCount->y()+pCount->h()+20;
-                pCount->value(pCountOld->value());
-
-                std::string sName=std::to_string(iPart)+ " " +def::mapeProductNames.at(prod);
-                m_map_pairPartProd_Name[std::make_pair(iPart,prod)]=sName;
-                pCount->label(m_map_pairPartProd_Name.at(std::make_pair(iPart,prod)).c_str());
-
-                pPartValuesGroupNew->add(pCount);
-                mapPart_Prod_cbShow_New[std::make_pair(iPart,static_cast<def::eProduct>(prod))] = pCount;
+                Fl_Counter* pCountOld = m_mapPart_Prod_ProductionCounter.at(std::make_pair(iPart,static_cast<def::eProduct>(prod)));
+                pCountProd->value(pCountOld->value());
             }
+
+            //std::string sName=std::to_string(iPart)+ " " +def::mapeProductNames.at(prod);
+            //m_map_pairPartProd_Name[std::make_pair(iPart,prod)]=sName;
+            pCountProd->label(m_map_pairPartProd_Name.at(std::make_pair(iPart,prod)).c_str());
+
+            pPartValuesGroupNew->add(pCountProd);
+
+            newmapPart_Prod_ProductionCounter[std::make_pair(iPart,static_cast<def::eProduct>(prod))] = pCountProd;
+            //
+
+
+            nYLast = pCountInit->y()+pCountInit->h()+20;
+
+
         }
+
     }
 
-    m_mapPart_Prod_cbShow = mapPart_Prod_cbShow_New;
+    m_mapPart_Prod_InitStockCounter = newmapPart_Prod_InitStockCounter;
+    this->m_mapPart_Prod_ProductionCounter = newmapPart_Prod_ProductionCounter;
 
-    std::cout << "2 m_mapPart_Prod_cbShow.size()" << m_mapPart_Prod_cbShow.size() << std::endl;
+    std::cout << "2 m_mapPart_Prod_InitStockCounter.size()" << m_mapPart_Prod_InitStockCounter.size() << std::endl;
 
     m_pWindow->add(pPartValuesGroupNew);
     std::cout << "NumPartUpdated antes del clear" << std::endl;
@@ -176,11 +193,11 @@ void CMainDialog::LaunchEditedScenario(Fl_Widget* w)
 //        double dNumOfProd;
 //    } strInfo;
 
-    double debugSize = m_mapPart_Prod_cbShow.size();
-    std::cout << "4 m_mapPart_Prod_cbShow.size()" << m_mapPart_Prod_cbShow.size() << std::endl;
+    double debugSize = m_mapPart_Prod_InitStockCounter.size();
+    std::cout << "4 m_mapPart_Prod_InitStockCounter.size()" << m_mapPart_Prod_InitStockCounter.size() << std::endl;
 
     std::set<int> setPartIndex;
-    for (auto & pairPartProd_cbShow:m_mapPart_Prod_cbShow)
+    for (auto & pairPartProd_cbShow:m_mapPart_Prod_InitStockCounter)
     {
         setPartIndex.insert(pairPartProd_cbShow.first.first);
     }
@@ -189,7 +206,7 @@ void CMainDialog::LaunchEditedScenario(Fl_Widget* w)
     {
         std::map<def::eProduct,double> mapProd_Amount;
         //long iPart = pairPartIndex_Info.first;
-        for (auto & pairPartProd_cbShow:m_mapPart_Prod_cbShow)
+        for (auto & pairPartProd_cbShow:m_mapPart_Prod_InitStockCounter)
         {
             std::pair<int,def::eProduct> pairPartProd = pairPartProd_cbShow.first;
             Fl_Counter* pflCounter = pairPartProd_cbShow.second;

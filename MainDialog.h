@@ -89,7 +89,8 @@ class CMainDialog
         //
         Fl_Counter* m_pCounterNumPartValue;
 
-        std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_cbShow;
+        std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_InitStockCounter;
+        std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_ProductionCounter;
 
         std::map<std::pair<int,int>,std::string> m_map_pairPartProd_Name;
 
