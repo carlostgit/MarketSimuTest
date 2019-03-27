@@ -33,24 +33,24 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
 			<Add option="-fexceptions" />
-			<Add directory="D:/fltk/fltk-1.3.4-2" />
+			<Add directory="./ExternalLibs/fltk" />
 		</Compiler>
 		<Linker>
 			<Add option="-static-libstdc++" />
 			<Add option="-static-libgcc" />
 			<Add option="-static" />
-			<Add library="D:/fltk/fltk-1.3.4-2/lib/libfltk.a" />
-			<Add library="D:/fltk/fltk-1.3.4-2/lib/libfltk_forms.a" />
-			<Add library="D:/fltk/fltk-1.3.4-2/lib/libfltk_gl.a" />
-			<Add library="D:/fltk/fltk-1.3.4-2/lib/libfltk_images.a" />
-			<Add library="D:/fltk/fltk-1.3.4-2/lib/libfltk_jpeg.a" />
-			<Add library="D:/fltk/fltk-1.3.4-2/lib/libfltk_png.a" />
-			<Add library="D:/fltk/fltk-1.3.4-2/lib/libfltk_z.a" />
-			<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libgdi32.a" />
-			<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libole32.a" />
-			<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libcomctl32.a" />
-			<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libuuid.a" />
-			<Add library="C:/Program Files (x86)/CodeBlocks/MinGW/lib/libws2_32.a" />
+			<Add library="./ExternalLibs/fltk/lib/libfltk.a" />
+			<Add library="./ExternalLibs/fltk/lib/libfltk_forms.a" />
+			<Add library="./ExternalLibs/fltk/lib/libfltk_gl.a" />
+			<Add library="./ExternalLibs/fltk/lib/libfltk_images.a" />
+			<Add library="./ExternalLibs/fltk/lib/libfltk_jpeg.a" />
+			<Add library="./ExternalLibs/fltk/lib/libfltk_png.a" />
+			<Add library="./ExternalLibs/fltk/lib/libfltk_z.a" />
+			<Add library="./ExternalLibs/MinGW/lib/libgdi32.a" />
+			<Add library="./ExternalLibs/MinGW/lib/libole32.a" />
+			<Add library="./ExternalLibs/MinGW/lib/libcomctl32.a" />
+			<Add library="./ExternalLibs/MinGW/lib/libuuid.a" />
+			<Add library="./ExternalLibs/MinGW/lib/libws2_32.a" />
 		</Linker>
 		<Unit filename="DEFINES.H" />
 		<Unit filename="LEDGER.CPP" />

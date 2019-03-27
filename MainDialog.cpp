@@ -59,6 +59,14 @@ void CMainDialog::NumPartUpdated(Fl_Widget* w)
     std::map<std::pair<int,def::eProduct>,Fl_Counter*> newmapPart_Prod_ProductionCounter;
 
     long nYLast=20;
+
+    Fl_Box* pBox1 = new Fl_Box(700,nYLast,100,20);
+    pBox1->label("Stock Ini");
+    Fl_Box* pBox2 = new Fl_Box(800,nYLast,100,20);
+    pBox2->label("Production Ini");
+
+    nYLast = pBox1->y()+pBox1->h();
+
     int nPart=m_pCounterNumPartValue->value();
     for(int iPart=0;iPart<nPart;iPart++)
     {
