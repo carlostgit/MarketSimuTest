@@ -212,33 +212,53 @@ void CMainDialog::LaunchEditedScenario(Fl_Widget* w)
 
     for (auto & iPart:setPartIndex)
     {
-        std::map<def::eProduct,double> mapProd_Amount;
+        std::map<def::eProduct,double> mapProd_InitStockAmount;
         //long iPart = pairPartIndex_Info.first;
-        for (auto & pairPartProd_cbShow:m_mapPart_Prod_InitStockCounter)
+        for (auto & pairPartProd_InitStock:m_mapPart_Prod_InitStockCounter)
         {
-            std::pair<int,def::eProduct> pairPartProd = pairPartProd_cbShow.first;
-            Fl_Counter* pflCounter = pairPartProd_cbShow.second;
+            std::pair<int,def::eProduct> pairPartProd = pairPartProd_InitStock.first;
+            Fl_Counter* pflCounter = pairPartProd_InitStock.second;
             double dAmount = pflCounter->value();
-            mapProd_Amount[pairPartProd.second]=dAmount;
+            mapProd_InitStockAmount[pairPartProd.second]=dAmount;
         }
 
+        std::map<def::eProduct,double> mapProd_ProductionAmount;
+        //TODO. Cargar esto con los datos del dialogo (m_mapPart_Prod_ProductionCounter)
+        for (auto & pairPartProd_Production:m_mapPart_Prod_ProductionCounter)
+        {
+            std::pair<int,def::eProduct> pairPartProd = pairPartProd_Production.first;
+            Fl_Counter* pflCounter = pairPartProd_Production.second;
+            double dAmount = pflCounter->value();
+            mapProd_ProductionAmount[pairPartProd.second]=dAmount;
+        }
 
         CParticipant* pParticipant = new CParticipant();
 
-        CStock stockPart(mapProd_Amount);
+        CStock stockPart(mapProd_InitStockAmount);
         pParticipant->SetStock(stockPart);
-        pParticipant->SetProductSatisfactionMap(mapProd_Amount);
-        pParticipant->SetProductConsumptionMap(mapProd_Amount);
-        pParticipant->SetProductPrCapacityMap(mapProd_Amount);
+        pParticipant->SetProductPrCapacityMap(mapProd_ProductionAmount);
+
+        std::map<def::eProduct,double> mapeProd_dAmountOne;
+        mapeProd_dAmountOne[def::PROD_CLOTH]=1.0;
+        mapeProd_dAmountOne[def::PROD_FOOD]=1.0;
+        mapeProd_dAmountOne[def::PROD_GOLD]=1.0;
+        //TODO: Cargar lo siguiente también de algún widget
+        pParticipant->SetProductSatisfactionMap(mapeProd_dAmountOne);
+        pParticipant->SetProductConsumptionMap(mapeProd_dAmountOne);
 
         m_pMarket->AddParticipant(pParticipant);
     }
+
 
     std::map<def::eProduct,double> mapeProd_dAmount;
     mapeProd_dAmount[def::PROD_CLOTH]=1.0;
     mapeProd_dAmount[def::PROD_FOOD]=1.0;
     mapeProd_dAmount[def::PROD_GOLD]=1.0;
     CStock stock(mapeProd_dAmount);
+
+    //TODO: Acordarme de probar a compilar y lanzar en el PC de sobremesa el proyecto con las librerías de 32 bits
+    //TODO: Acordarme de crear 2 proyectos. 1 con librerías externas para 32 bits, y otro para librerías para 64
+    //La solución puede ser añadir más build targets, (unos con Release y Debug para 32 bits y otros para 64S bits), con librerías en distintos directorios
 
     CPricesInfo pricesInfo;
     pricesInfo.SetStockForPrices(stock);
@@ -542,7 +562,7 @@ void CMainDialog::ViewResultsOfParticipants()
     pBoxMin->label(m_sPartChartMin.c_str());
     pBoxMax->label(m_sPartChartMax.c_str());
 
-
+    std::map<int,Fl_Check_Button*> mapPartId_CheckBNew;
     int nCountPart=0;
     for(auto& part:m_pMarket->GetParticipants())
     {
@@ -552,32 +572,54 @@ void CMainDialog::ViewResultsOfParticipants()
         std::cout << "nPartId " << nPartId << std::endl;
         std::cout << "nCountPart " << nCountPart << std::endl;
 
-        Fl_Check_Button* pCheckButton = new Fl_Check_Button(m_pParticipantsChartGroup->x()+nCountPart*100,
-                                                       m_pParticipantsChartGroup->y()+m_pParticipantsChartGroup->h()+20,
+
+        //static std::string nsId = std::to_string(nPartId);
+
+        Fl_Check_Button* pCheckButton = new Fl_Check_Button(m_pParticipantsChartGroup->x(),
+                                                       m_pParticipantsChartGroup->y() + m_pParticipantsChartGroup->h() + 20 + nCountPart*20,
                                                        100,20);
 
-
         pCheckButton->callback((Fl_Callback*)CMainDialog::ViewResults, (void*)this);
-        //static std::string nsId = std::to_string(nPartId);
+
+        m_mapPartId_sName[nPartId]=std::to_string(nPartId);
+
+        pCheckButton->label(m_mapPartId_sName.at(nPartId).c_str());
+
+        mapPartId_CheckBNew[nPartId] = pCheckButton;
 
         if(m_mapPartId_CheckB.end()==m_mapPartId_CheckB.find(nPartId))
         {
-
-            m_mapPartId_sName[nPartId]=std::to_string(nPartId);
-
-            pCheckButton->label(m_mapPartId_sName.at(nPartId).c_str());
-
-            this->m_pWindow->add(pCheckButton);
-
-            m_mapPartId_CheckB[nPartId] = pCheckButton;
-
             pCheckButton->value(1);
         }
+        else
+        {
+            pCheckButton->value(m_mapPartId_CheckB.at(nPartId)->value());
+        }
+
 
         //pCheckButton->label(m_mapPartId_CheckB.)
 
         nCountPart++;
     }
+
+
+    for (auto & pairId_Check:m_mapPartId_CheckB)
+    {
+        Fl_Check_Button* pCheckButtonOld=pairId_Check.second;
+        delete(pCheckButtonOld);
+    }
+    m_mapPartId_CheckB.clear();
+
+    m_mapPartId_CheckB = mapPartId_CheckBNew;
+
+    for (auto & pairId_Check:m_mapPartId_CheckB)
+    {
+        Fl_Check_Button* pCheckButtonNew=pairId_Check.second;
+        this->m_pWindow->add(pCheckButtonNew);
+    }
+
+
+
 
 
     m_pParticipantsChartGroup->end();
