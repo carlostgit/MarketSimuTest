@@ -21,6 +21,44 @@
 
 
 
+CMainDialog::StructPartiChartGroup::StructPartiChartGroup():Fl_Group(10,10,10,10,nullptr){}
+
+CMainDialog::StructPartiChartGroup::StructPartiChartGroup(int x, int y, int w, int h, const char* c):Fl_Group(x,y,w,h,c){}
+
+bool CMainDialog::StructPartiChartGroup::ViewParticipant(int nPartId)
+{
+    return this->sCheckButtons.IsChecked(nPartId);
+}
+std::string CMainDialog::StructPartiChartGroup::GetNameOfParticipant(int nPartId)
+{
+    return this->sCheckButtons.GetName(nPartId);
+}
+
+bool CMainDialog::StructPartiChartGroup::StructCheckButtons::IsChecked(int nPartId)
+{
+    std::cout << "mapPartId_CheckB.size()" << mapPartId_CheckB.size() << std::endl;
+    if(this->mapPartId_CheckB.end()!=this->mapPartId_CheckB.find(nPartId))
+    {
+        Fl_Check_Button* pCheckButton = this->mapPartId_CheckB.at(nPartId);
+        if(pCheckButton->value()==0)
+            return false;
+        else
+            return true;
+    }
+    return true;
+}
+std::string CMainDialog::StructPartiChartGroup::StructCheckButtons::GetName(int nPartId)
+{
+    std::string str;
+    if(this->mapPartId_sName.end()!=this->mapPartId_sName.find(nPartId))
+    {
+        str = this->mapPartId_sName.at(nPartId);
+    }
+    return str;
+}
+
+
+
 CMainDialog::CMainDialog():
     m_pMarketPricesChartGroup(nullptr),m_pWindow(nullptr),
     //m_dMinChartBound(0.0),
@@ -30,7 +68,8 @@ CMainDialog::CMainDialog():
     m_pCounterZoomValue(nullptr),
     m_pCounterFirstStep(nullptr),
     m_pCounterLastStep(nullptr),
-    m_pPartValuesGroup(nullptr)
+    m_pPartValuesGroup(nullptr),
+    m_psPartiChartGroup(nullptr)
 {
     //ctor
 }
@@ -468,9 +507,14 @@ void CMainDialog::ViewResultsOfMarketPlace()
 void CMainDialog::ViewResultsOfParticipants()
 {
 
-    m_pParticipantsChartGroup->begin();
 
-    m_pParticipantsChartGroup->clear();
+
+    StructPartiChartGroup* psPartiChartGroupNew = new StructPartiChartGroup(350,300,300,170);
+
+
+
+    psPartiChartGroupNew->begin();
+    psPartiChartGroupNew->clear();
 
     std::map<int,std::vector<CStock>> mapPartId_vStocksSent =
                 this->m_pMarket->GetLedgerRef()->GetSentToMarketForEachStep();
@@ -507,12 +551,8 @@ void CMainDialog::ViewResultsOfParticipants()
             std::cout<<"GraphInf nInfoType: "<< nInfoType << std::endl;
             std::cout<<"GraphInf nPartId: "<< nPartId << std::endl;
 
-            if(m_mapPartId_CheckB.end()!=m_mapPartId_CheckB.find(nPartId))
-            {
-                Fl_Check_Button* pCheckButton = m_mapPartId_CheckB.at(nPartId);
-                if(pCheckButton->value()==0)
-                    continue;
-            }
+            if(m_psPartiChartGroup && false==m_psPartiChartGroup->ViewParticipant(nPartId))
+                continue;
 
             if(m_mapInfo_cbShow.end()!=m_mapInfo_cbShow.find(nInfoType))
             {
@@ -521,8 +561,8 @@ void CMainDialog::ViewResultsOfParticipants()
                     continue;
             }
 
-            Fl_Chart* pChart = new Fl_Chart(m_pParticipantsChartGroup->x(),m_pParticipantsChartGroup->y(),
-                                            m_pParticipantsChartGroup->w(),m_pParticipantsChartGroup->h());
+            Fl_Chart* pChart = new Fl_Chart(psPartiChartGroupNew->x(),psPartiChartGroupNew->y(),
+                                            psPartiChartGroupNew->w(),psPartiChartGroupNew->h());
             pChart->type(FL_LINE_CHART);
             pChart->box(FL_NO_BOX);
 
@@ -548,19 +588,19 @@ void CMainDialog::ViewResultsOfParticipants()
         pChart->bounds(dMinBound,dMaxBound);
     }
 
-    Fl_Box *pBoxMin = new Fl_Box(m_pParticipantsChartGroup->x()-10,
-                                  m_pParticipantsChartGroup->y()+m_pParticipantsChartGroup->h(),
+    Fl_Box *pBoxMin = new Fl_Box(psPartiChartGroupNew->x()-10,
+                                  psPartiChartGroupNew->y()+psPartiChartGroupNew->h(),
                                   20, 20 );
-    Fl_Box *pBoxMax = new Fl_Box(m_pParticipantsChartGroup->x()-10,
-                                  m_pParticipantsChartGroup->y()-20,
+    Fl_Box *pBoxMax = new Fl_Box(psPartiChartGroupNew->x()-10,
+                                  psPartiChartGroupNew->y()-20,
                                   20, 20 );
 
 
-    m_sPartChartMin = std::to_string(dMinBound);
-    m_sPartChartMax = std::to_string(dMaxBound);
+    psPartiChartGroupNew->sChartMin = std::to_string(dMinBound);
+    psPartiChartGroupNew->sChartMax = std::to_string(dMaxBound);
 
-    pBoxMin->label(m_sPartChartMin.c_str());
-    pBoxMax->label(m_sPartChartMax.c_str());
+    pBoxMin->label(psPartiChartGroupNew->sChartMin.c_str());
+    pBoxMax->label(psPartiChartGroupNew->sChartMax.c_str());
 
     std::map<int,Fl_Check_Button*> mapPartId_CheckBNew;
     int nCountPart=0;
@@ -575,55 +615,59 @@ void CMainDialog::ViewResultsOfParticipants()
 
         //static std::string nsId = std::to_string(nPartId);
 
-        Fl_Check_Button* pCheckButton = new Fl_Check_Button(m_pParticipantsChartGroup->x(),
-                                                       m_pParticipantsChartGroup->y() + m_pParticipantsChartGroup->h() + 20 + nCountPart*20,
+        Fl_Check_Button* pCheckButton = new Fl_Check_Button(psPartiChartGroupNew->x(),
+                                                       psPartiChartGroupNew->y() + psPartiChartGroupNew->h() + 20 + nCountPart*20,
                                                        100,20);
 
         pCheckButton->callback((Fl_Callback*)CMainDialog::ViewResults, (void*)this);
 
-        m_mapPartId_sName[nPartId]=std::to_string(nPartId);
+        psPartiChartGroupNew->sCheckButtons.mapPartId_sName[nPartId]=std::to_string(nPartId);
 
-        pCheckButton->label(m_mapPartId_sName.at(nPartId).c_str());
+        pCheckButton->label(psPartiChartGroupNew->sCheckButtons.mapPartId_sName.at(nPartId).c_str());
 
         mapPartId_CheckBNew[nPartId] = pCheckButton;
 
-        if(m_mapPartId_CheckB.end()==m_mapPartId_CheckB.find(nPartId))
+        if(nullptr == m_psPartiChartGroup || m_psPartiChartGroup->sCheckButtons.mapPartId_CheckB.end()==m_psPartiChartGroup->sCheckButtons.mapPartId_CheckB.find(nPartId))
         {
             pCheckButton->value(1);
         }
         else
         {
-            pCheckButton->value(m_mapPartId_CheckB.at(nPartId)->value());
+            pCheckButton->value(m_psPartiChartGroup->sCheckButtons.mapPartId_CheckB.at(nPartId)->value());
         }
-
-
-        //pCheckButton->label(m_mapPartId_CheckB.)
 
         nCountPart++;
     }
 
 
-    for (auto & pairId_Check:m_mapPartId_CheckB)
-    {
-        Fl_Check_Button* pCheckButtonOld=pairId_Check.second;
-        delete(pCheckButtonOld);
-    }
-    m_mapPartId_CheckB.clear();
+//    for (auto & pairId_Check:m_psPartiChartGroup->sCheckButtons.mapPartId_CheckB)
+//    {
+//        Fl_Check_Button* pCheckButtonOld=pairId_Check.second;
+//        delete(pCheckButtonOld);
+//    }
+//    m_psPartiChartGroup->sCheckButtons.mapPartId_CheckB.clear();
 
-    m_mapPartId_CheckB = mapPartId_CheckBNew;
+    psPartiChartGroupNew->sCheckButtons.mapPartId_CheckB = mapPartId_CheckBNew;
 
-    for (auto & pairId_Check:m_mapPartId_CheckB)
+    for (auto & pairId_Check:psPartiChartGroupNew->sCheckButtons.mapPartId_CheckB)
     {
         Fl_Check_Button* pCheckButtonNew=pairId_Check.second;
         this->m_pWindow->add(pCheckButtonNew);
     }
 
 
+    psPartiChartGroupNew->end();
 
 
 
-    m_pParticipantsChartGroup->end();
+    if(this->m_psPartiChartGroup)
+    {
+        m_psPartiChartGroup->clear();
+        delete(this->m_psPartiChartGroup);
+        this->m_psPartiChartGroup=nullptr;
+    }
 
+    m_psPartiChartGroup = psPartiChartGroupNew;
 }
 
 std::map<std::pair<int,int>, std::map<def::eProduct, std::vector<double>>> CMainDialog::GetParticGraphInfo()
@@ -641,7 +685,7 @@ std::map<std::pair<int,int>, std::map<def::eProduct, std::vector<double>>> CMain
         //std::string sName = "Part " + std::to_string(pairPartId_vStockSent.first)+def::mapeProductNames.at(prod)+" Sent";
         //std::string sName = sGraphName;
         int nPartId=nPart;
-        m_mapPartId_sName[nPartId]=std::to_string(nPartId);
+        //m_psPartiChartGroup->sCheckButtons.mapPartId_sName[nPartId]=std::to_string(nPartId);
         if(mapPart_Element_Prod_Values.end()==mapPart_Element_Prod_Values.find(std::make_pair(nPart,nElem)))
         {
 //            std::cout<<"newPartElem"<< std::endl;
@@ -802,9 +846,9 @@ void CMainDialog::run()
 //
 
    //Participant Chart
-    this->m_pParticipantsChartGroup = new Fl_Group(350,300,300,170);
-    m_pWindow->add(m_pParticipantsChartGroup);
-    //
+//    this->m_psPartiChartGroup = new StructPartiChartGroup(350,300,300,170);
+//    m_pWindow->add(m_psPartiChartGroup);
+//    //
 
     //Participants check_buttons
     int nCountInfo=0;
@@ -820,6 +864,7 @@ void CMainDialog::run()
         pCheckButton->callback((Fl_Callback*)CMainDialog::ViewResults, (void*)this);
 
         pCheckButton->label(pairInfo_Name.second.c_str());
+        //pCheckButton->label("m_mapInfo_cbShow");
         int nInfo=static_cast<int>(pairInfo_Name.first);
         m_mapInfo_cbShow[nInfo]=pCheckButton;
 

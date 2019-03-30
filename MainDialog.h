@@ -10,7 +10,8 @@ class CMarket;
 class Fl_Widget;
 class Fl_Chart;
 class Fl_Window;
-class Fl_Group;
+//class Fl_Group;
+#include <FL/Fl_Group.H>
 class Fl_Counter;
 class Fl_Check_Button;
 
@@ -66,10 +67,7 @@ class CMainDialog
         std::shared_ptr<CMarket> m_pMarket;
 
         //Market Prices Chart
-        //Fl_Chart *m_pChart;
         Fl_Group* m_pMarketPricesChartGroup;
-        //double m_dMinChartBound;
-        //double m_dMaxChartBound;
         std::string m_sChartMin;
         std::string m_sChartMax;
         Fl_Counter* m_pCounterZoomValue;
@@ -77,11 +75,43 @@ class CMainDialog
         Fl_Counter* m_pCounterLastStep;
 
         //Participant Chart
-        Fl_Group* m_pParticipantsChartGroup;
-        std::map<int,Fl_Check_Button*> m_mapPartId_CheckB;
-        std::map<int,std::string> m_mapPartId_sName;
-        std::string m_sPartChartMin;
-        std::string m_sPartChartMax;
+        //Fl_Group* m_pParticipantsChartGroup;
+
+        struct StructPartiChartGroup: public Fl_Group
+        {
+            StructPartiChartGroup();
+            StructPartiChartGroup(int x, int y, int w, int h, const char* c=0);
+
+            bool ViewParticipant(int nPartId);
+            std::string GetNameOfParticipant(int nPartId);
+
+
+            struct StructCheckButtons
+            {
+                std::map<int,Fl_Check_Button*> mapPartId_CheckB;
+                std::map<int,std::string> mapPartId_sName;
+                bool IsChecked(int nPartId);
+                std::string GetName(int nPartId);
+
+            } sCheckButtons;
+
+
+
+            std::string sChartMin;
+            std::string sChartMax;
+
+        }* m_psPartiChartGroup;
+//
+//        struct structPartiChartCheckButtons
+//        {
+//            std::map<int,Fl_Check_Button*> mapPartId_CheckB;
+//            std::map<int,std::string> mapPartId_sName;
+//        } m_sPartCheckButtons;
+//
+//        std::string m_sPartChartMin;
+//        std::string m_sPartChartMax;
+
+        //
 
         std::map<int,Fl_Check_Button*> m_mapInfo_cbShow;
         std::map<int,Fl_Check_Button*> m_mapProd_cbShow;
@@ -95,12 +125,6 @@ class CMainDialog
         std::map<std::pair<int,int>,std::string> m_map_pairPartProd_Name;
 
         Fl_Group* m_pPartValuesGroup;
-//
-//    std::map<long,CStock> GetStockIniMap(){return m_mapLogStockIni;} //Inicial y final?
-//    std::map<long,CStock> GetStockFinMap(){return m_mapLogStockFin;} //Inicial y final?
-//    std::map<long,CStock> GetLogConsume(){return m_mapLogConsume;}
-//    std::map<long,CStock> GetLogProduction(){return m_mapLogProduction;}
-//    std::map<long,CStock> GetLogSatisfaction(){return m_mapLogSatisfaction;} //TODO
 
         //
 
