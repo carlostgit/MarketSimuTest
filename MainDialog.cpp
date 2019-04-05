@@ -507,17 +507,10 @@ void CMainDialog::ViewResultsOfMarketPlace()
 void CMainDialog::ViewResultsOfParticipants()
 {
 
-
-
     StructPartiChartGroup* psPartiChartGroupNew = new StructPartiChartGroup(350,300,300,170);
-
-
 
     psPartiChartGroupNew->begin();
     psPartiChartGroupNew->clear();
-
-    std::map<int,std::vector<CStock>> mapPartId_vStocksSent =
-                this->m_pMarket->GetLedgerRef()->GetSentToMarketForEachStep();
 
 
     double dMinBound=0.0;
@@ -526,62 +519,125 @@ void CMainDialog::ViewResultsOfParticipants()
 
     std::vector<Fl_Chart*> vCharts;
 
-    long nCount=0;
 
-    std::map<std::pair<int,int>, std::map<def::eProduct, std::vector<double>>> mapPart_Elem_Prod_Values = GetParticGraphInfo();
+    //typedef std::map<std::pair<int,int>, std::map<def::eProduct, std::vector<double>>> valuesPerStep_t;
 
-    for (auto & pairPart_Prod_Values:mapPart_Elem_Prod_Values)
+    //std::map<std::pair<int,int>, std::map<def::eProduct, std::vector<double>>> mapPart_Typeinfo_Prod_Values = GetParticGraphInfo();
+
+
+    auto lfPaintCharts = [this,&psPartiChartGroupNew,&vCharts,&dMinBound,&dMaxBound](
+                            std::map<int,Fl_Check_Button*> mapInfo_cbShow,
+                            std::map<int,Fl_Check_Button*> mapProd_cbShow
+                            )
     {
-        int nPartId=pairPart_Prod_Values.first.first;
-        int nInfoType=pairPart_Prod_Values.first.second;
+        long nCount=0;
 
-        for (auto & prod:def::vProducts)
+        for(auto & pairProd_cbShow:mapProd_cbShow)
         {
-            std::map<def::eProduct, std::vector<double>> mapProdValues = pairPart_Prod_Values.second;
-            if(mapProdValues.end()==mapProdValues.find(prod))
-                continue;
-
-            if(false==m_mapProd_cbShow.at(prod)->value())
-                continue;
-
-
-            std::vector<double> vValues = mapProdValues.at(prod);
-
-            std::cout<<"GraphInf Prod: "<< prod << std::endl;
-            std::cout<<"GraphInf nInfoType: "<< nInfoType << std::endl;
-            std::cout<<"GraphInf nPartId: "<< nPartId << std::endl;
-
-            if(m_psPartiChartGroup && false==m_psPartiChartGroup->ViewParticipant(nPartId))
-                continue;
-
-            if(m_mapInfo_cbShow.end()!=m_mapInfo_cbShow.find(nInfoType))
+            if(pairProd_cbShow.second->value()!=0)
             {
-                Fl_Check_Button* pCheckButton = m_mapInfo_cbShow.at(nInfoType);
-                if(pCheckButton->value()==0)
-                    continue;
-            }
+                for(auto & pairTypeinfo_cbShow:mapInfo_cbShow)
+                {
+                    if(pairTypeinfo_cbShow.second->value()!=0)
+                    {
+                        for(auto& part:m_pMarket->GetParticipants())
+                        {
+                            if(nullptr==m_psPartiChartGroup || m_psPartiChartGroup->ViewParticipant(part->GetId()))
+                            {
+                                int nPartId = part->GetId();
+                                def::eProduct eProduct=static_cast<def::eProduct>(pairProd_cbShow.first);
+                                int nTypeInfo=pairTypeinfo_cbShow.first;
 
-            Fl_Chart* pChart = new Fl_Chart(psPartiChartGroupNew->x(),psPartiChartGroupNew->y(),
+                                Fl_Chart* pChart = new Fl_Chart(psPartiChartGroupNew->x(),psPartiChartGroupNew->y(),
                                             psPartiChartGroupNew->w(),psPartiChartGroupNew->h());
-            pChart->type(FL_LINE_CHART);
-            pChart->box(FL_NO_BOX);
+                                pChart->type(FL_LINE_CHART);
+                                pChart->box(FL_NO_BOX);
 
-            vCharts.push_back(pChart);
+                                vCharts.push_back(pChart);
 
-            for (auto & value:vValues)
-            {
-                unsigned long color=FL_RED+10*nCount;
-                nCount++;
 
-                //std::cout<<"vStocks.size(): "<< vStocks.size()<<std::endl;
-                double dValue=value;
-                if(dValue>dMaxBound)
-                    dMaxBound=dValue;
+                                std::vector<double> vValues = GetValuesFor(nPartId, nTypeInfo, eProduct);
+                                for (auto & value:vValues)
+                                {
+                                    unsigned long color=FL_RED+10*nCount;
+                                    nCount++;
 
-                pChart->add(dValue,def::mapeProductNames.at(prod).c_str(),color);
+                                    //std::cout<<"vStocks.size(): "<< vStocks.size()<<std::endl;
+                                    double dValue=value;
+                                    if(dValue>dMaxBound)
+                                        dMaxBound=dValue;
+
+                                    pChart->add(dValue,def::mapeProductNames.at(eProduct).c_str(),color);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-    }
+    };
+
+    lfPaintCharts(m_mapInfo_cbShow,m_mapProd_cbShow);
+
+
+//    std::vector<Fl_Chart*> vCharts;
+//
+//    long nCount=0;
+//
+//
+//
+//    for (auto & pairPart_Prod_Values:mapPart_Typeinfo_Prod_Values)
+//    {
+//        int nPartId=pairPart_Prod_Values.first.first;
+//        int nInfoType=pairPart_Prod_Values.first.second;
+//
+//        for (auto & prod:def::vProducts)
+//        {
+//            std::map<def::eProduct, std::vector<double>> mapProdValues = pairPart_Prod_Values.second;
+//            if(mapProdValues.end()==mapProdValues.find(prod))
+//                continue;
+//
+//            if(false==m_mapProd_cbShow.at(prod)->value())
+//                continue;
+//
+//
+//            std::vector<double> vValues = mapProdValues.at(prod);
+//
+//            std::cout<<"GraphInf Prod: "<< prod << std::endl;
+//            std::cout<<"GraphInf nInfoType: "<< nInfoType << std::endl;
+//            std::cout<<"GraphInf nPartId: "<< nPartId << std::endl;
+//
+//            if(m_psPartiChartGroup && false==m_psPartiChartGroup->ViewParticipant(nPartId))
+//                continue;
+//
+//            if(m_mapInfo_cbShow.end()!=m_mapInfo_cbShow.find(nInfoType))
+//            {
+//                Fl_Check_Button* pCheckButton = m_mapInfo_cbShow.at(nInfoType);
+//                if(pCheckButton->value()==0)
+//                    continue;
+//            }
+//
+//            Fl_Chart* pChart = new Fl_Chart(psPartiChartGroupNew->x(),psPartiChartGroupNew->y(),
+//                                            psPartiChartGroupNew->w(),psPartiChartGroupNew->h());
+//            pChart->type(FL_LINE_CHART);
+//            pChart->box(FL_NO_BOX);
+//
+//            vCharts.push_back(pChart);
+//
+//            for (auto & value:vValues)
+//            {
+//                unsigned long color=FL_RED+10*nCount;
+//                nCount++;
+//
+//                //std::cout<<"vStocks.size(): "<< vStocks.size()<<std::endl;
+//                double dValue=value;
+//                if(dValue>dMaxBound)
+//                    dMaxBound=dValue;
+//
+//                pChart->add(dValue,def::mapeProductNames.at(prod).c_str(),color);
+//            }
+//        }
+//    }
 
     for (auto& pChart:vCharts)
     {
@@ -668,6 +724,94 @@ void CMainDialog::ViewResultsOfParticipants()
     }
 
     m_psPartiChartGroup = psPartiChartGroupNew;
+}
+
+std::vector<double> CMainDialog::GetValuesFor(int nPartId, int nTypeInfo,def::eProduct eProduct)
+{
+    std::vector<double> vValues;
+
+    auto lfAddMapStepStock = [&eProduct](std::vector<double>& vVal, std::map<long,CStock> mapStepStock)
+    {
+        for(auto & pairStep_Stock:mapStepStock)
+        {
+            double dAmount = pairStep_Stock.second.GetAmount(eProduct);
+            vVal.push_back(dAmount);
+        }
+    };
+
+    if (nTypeInfo == static_cast<int>(eInfoToShow::STOCK_INI))
+    {
+        for(auto & pPart:m_pMarket->GetParticipants())
+        {
+            if (pPart->GetId()==nPartId)
+                lfAddMapStepStock(vValues,pPart->GetStockIniMap());
+        }
+    }
+    else if (nTypeInfo == static_cast<int>(eInfoToShow::STOCK_FIN))
+    {
+        for(auto & pPart:m_pMarket->GetParticipants())
+        {
+            if (pPart->GetId()==nPartId)
+                lfAddMapStepStock(vValues,pPart->GetStockFinMap());
+        }
+    }
+    else if (nTypeInfo == static_cast<int>(eInfoToShow::STOCK_CONSUM))
+    {
+        for(auto & pPart:m_pMarket->GetParticipants())
+        {
+            if (pPart->GetId()==nPartId)
+                lfAddMapStepStock(vValues,pPart->GetLogConsume());
+        }
+    }
+    else if (nTypeInfo == static_cast<int>(eInfoToShow::STOCK_PROD))
+    {
+        for(auto & pPart:m_pMarket->GetParticipants())
+        {
+            if (pPart->GetId()==nPartId)
+                lfAddMapStepStock(vValues,pPart->GetLogProduction());
+        }
+    }
+    else if (nTypeInfo == static_cast<int>(eInfoToShow::SATISF))
+    {
+        for(auto & pPart:m_pMarket->GetParticipants())
+        {
+            if (pPart->GetId()==nPartId)
+                lfAddMapStepStock(vValues,pPart->GetLogSatisfaction());
+        }
+    }
+
+    else if (nTypeInfo == static_cast<int>(eInfoToShow::STOCK_SENT))
+    {
+        std::map<int,std::vector<CStock>> mapPartId_vStocksSent =
+                this->m_pMarket->GetLedgerRef()->GetSentToMarketForEachStep();
+
+        for(auto & pairPartId_vStockSent:mapPartId_vStocksSent)
+        {
+            for(auto& stock:pairPartId_vStockSent.second)
+            {
+                double dAmount = stock.GetAmount(eProduct);
+                vValues.push_back(dAmount);
+            }
+        }
+    }
+    else if (nTypeInfo == static_cast<int>(eInfoToShow::STOCK_RECEIVED))
+    {
+        std::map<int,std::vector<CStock>> mapPartId_vStocksReceived =
+                this->m_pMarket->GetLedgerRef()->GetReceivedFromMarketEachStep();
+
+        for(auto & pairPartId_vStockRec:mapPartId_vStocksReceived)
+        {
+            int nPartId = pairPartId_vStockRec.first;
+            for(auto& stock:pairPartId_vStockRec.second)
+            {
+                double dAmount = stock.GetAmount(eProduct);
+                vValues.push_back(dAmount);
+            }
+        }
+    }
+
+
+    return vValues;
 }
 
 std::map<std::pair<int,int>, std::map<def::eProduct, std::vector<double>>> CMainDialog::GetParticGraphInfo()
@@ -759,12 +903,6 @@ std::map<std::pair<int,int>, std::map<def::eProduct, std::vector<double>>> CMain
             lfAddMapStepStock(nPartId,eInfoToShow::STOCK_CONSUM,prod,pPart->GetLogConsume());
             lfAddMapStepStock(nPartId,eInfoToShow::STOCK_PROD,prod,pPart->GetLogProduction());
             lfAddMapStepStock(nPartId,eInfoToShow::SATISF,prod,pPart->GetLogSatisfaction());
-
-//            std::cout << "mapStepStock.size()" << mapStepStock.size() << std::endl;
-//            std::cout << "mapStepStockFin.size()" << mapStepStockFin.size() << std::endl;
-//            std::cout << "mapStepStockConsume.size()" << mapStepStockConsume.size() << std::endl;
-//            std::cout << "mapStepStockProd.size()" << mapStepStockProd.size() << std::endl;
-//            std::cout << "mapStepStockSati.size()" << mapStepStockSati.size() << std::endl;
 
         }
     }

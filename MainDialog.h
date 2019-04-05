@@ -55,6 +55,7 @@ class CMainDialog
         void ViewResultsOfMarketPlace();
         void ViewResultsOfParticipants();
         std::map<std::pair<int,int>, std::map<def::eProduct, std::vector<double>>> GetParticGraphInfo();
+        std::vector<double> GetValuesFor(int nPartId,int nTypeInfo,def::eProduct eProduct);
 
         static void NumPartUpdated(Fl_Widget* w, void* pvoidMainDialog);
         void NumPartUpdated(Fl_Widget* w);
