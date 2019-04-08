@@ -83,20 +83,33 @@ class CMainDialog
             StructPartiChartGroup();
             StructPartiChartGroup(int x, int y, int w, int h, const char* c=0);
 
-            bool ViewParticipant(int nPartId);
+            bool ViewParticipant(int nPartId) const;
             std::string GetNameOfParticipant(int nPartId);
+
+            std::vector<double> GetValuesFor(CMarket* pMarket,int nPartId, int nTypeInfo,def::eProduct eProduct); //todo
+
+
+            void AddUpdatedCharts(
+                           const std::map<int,Fl_Check_Button*> mapInfo_cbShow,
+                            const std::map<int,Fl_Check_Button*> mapProd_cbShow,
+                            const StructPartiChartGroup* psPartiChartGroupOld,
+                            const std::map<def::eProduct,std::string>& mapProdNames,
+                            CMarket* pMarket
+                           );
 
 
             struct StructCheckButtons
             {
                 std::map<int,Fl_Check_Button*> mapPartId_CheckB;
                 std::map<int,std::string> mapPartId_sName;
-                bool IsChecked(int nPartId);
+                bool IsChecked(int nPartId) const;
                 std::string GetName(int nPartId);
 
             } sCheckButtons;
 
-
+            std::vector<Fl_Chart*> vCharts;
+            double dMinBound;
+            double dMaxBound;
 
             std::string sChartMin;
             std::string sChartMax;
