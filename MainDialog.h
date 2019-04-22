@@ -10,11 +10,14 @@ class CMarket;
 class Fl_Widget;
 class Fl_Chart;
 class Fl_Window;
+class Fl_Scroll;
 //class Fl_Group;
 #include <FL/Fl_Group.H>
+#include <FL/Fl_Scroll.H>
 class Fl_Counter;
 class Fl_Check_Button;
 
+class CStock;
 
 class CMainDialog
 {
@@ -78,7 +81,7 @@ class CMainDialog
         //Participant Chart
         //Fl_Group* m_pParticipantsChartGroup;
 
-        struct StructPartiChartGroup: public Fl_Group
+        struct StructPartiChartGroup: public Fl_Scroll
         {
             StructPartiChartGroup();
             StructPartiChartGroup(int x, int y, int w, int h, const char* c=0);
@@ -88,13 +91,13 @@ class CMainDialog
 
             std::vector<double> GetValuesFor(CMarket* pMarket,int nPartId, int nTypeInfo,def::eProduct eProduct); //todo
 
-
-            void AddUpdatedCharts(
+            void InitCharts(
                            const std::map<int,Fl_Check_Button*> mapInfo_cbShow,
                             const std::map<int,Fl_Check_Button*> mapProd_cbShow,
                             const StructPartiChartGroup* psPartiChartGroupOld,
                             const std::map<def::eProduct,std::string>& mapProdNames,
-                            CMarket* pMarket
+                            CMarket* pMarket,
+                            const CMainDialog* pMainDialog
                            );
 
 
@@ -115,34 +118,39 @@ class CMainDialog
             std::string sChartMax;
 
         }* m_psPartiChartGroup;
-//
-//        struct structPartiChartCheckButtons
-//        {
-//            std::map<int,Fl_Check_Button*> mapPartId_CheckB;
-//            std::map<int,std::string> mapPartId_sName;
-//        } m_sPartCheckButtons;
-//
-//        std::string m_sPartChartMin;
-//        std::string m_sPartChartMax;
 
-        //
-
+        //CheckBoxes de información que quiero visulizar
         std::map<int,Fl_Check_Button*> m_mapInfo_cbShow;
         std::map<int,Fl_Check_Button*> m_mapProd_cbShow;
 
-        //
+        //Número de participantes para las condiciones iniciales
         Fl_Counter* m_pCounterNumPartValue;
 
-        std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_InitStockCounter;
-        std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_ProductionCounter;
+        //Controles para condiciones iniciales:
+        struct StructPartiValuesGroup: public Fl_Scroll
+        {
+            StructPartiValuesGroup():Fl_Scroll(0,0,100,100){;}
+            StructPartiValuesGroup(int x, int y, int w, int h, const char* c=0):
+                Fl_Scroll(x,y,w,h,c){;}
 
-        std::map<std::pair<int,int>,std::string> m_map_pairPartProd_Name;
+            void InitPartiValuesControls(StructPartiValuesGroup* pPartValuesGroupNew,
+                                        long nNumOfParticipants,
+                                        StructPartiValuesGroup* pPartValuesGroupOld
+                                        );
 
-        Fl_Group* m_pPartValuesGroup;
+
+            CStock GetInitStock(int nPartIndex);
+            std::map<def::eProduct, double> GetPrCapacityMap(int nPartIndex);
+
+            std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_InitStockCounter;
+            std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_ProductionCounter;
+            std::map<std::pair<int,int>,std::string> m_map_pairPartProd_Name;
+        }* m_psPartiValuesGroup;
 
         //
 
         Fl_Window *m_pWindow;
+        Fl_Scroll *m_pScroll;
 
     private:
 };
