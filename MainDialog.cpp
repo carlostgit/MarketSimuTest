@@ -32,7 +32,11 @@ void CMainDialog::StructPartiValuesGroup::InitPartiValuesControls(StructPartiVal
     Fl_Box* pBox1 = new Fl_Box(700,nYLast,100,20);
     pBox1->label("Stock Ini");
     Fl_Box* pBox2 = new Fl_Box(800,nYLast,100,20);
-    pBox2->label("Production Ini");
+    pBox2->label("Product Ini");
+    Fl_Box* pBox3 = new Fl_Box(900,nYLast,100,20);
+    pBox3->label("Satisfaction Ini");
+    Fl_Box* pBox4 = new Fl_Box(1000,nYLast,100,20);
+    pBox4->label("Consumption Ini");
 
     nYLast = pBox1->y()+pBox1->h();
 
@@ -64,7 +68,7 @@ void CMainDialog::StructPartiValuesGroup::InitPartiValuesControls(StructPartiVal
 
 
 
-                //Production Amounts
+            //Production Amounts
             Fl_Counter* pCountProd = new Fl_Counter(800,nYLast,100,20);
             //nYLast = pCountProd->y()+pCountProd->h()+20;
             pCountProd->value(2.0);
@@ -83,6 +87,50 @@ void CMainDialog::StructPartiValuesGroup::InitPartiValuesControls(StructPartiVal
 
             pPartValuesGroupNew->m_mapPart_Prod_ProductionCounter[std::make_pair(iPart,static_cast<def::eProduct>(prod))] = pCountProd;
             //
+
+
+            //Satisfaction Amounts
+            Fl_Counter* pCountSatisf = new Fl_Counter(900,nYLast,100,20);
+            //nYLast = pCountProd->y()+pCountProd->h()+20;
+            pCountSatisf->value(2.0);
+
+            if(pPartValuesGroupOld && pPartValuesGroupOld->m_mapPart_Prod_SatisfactionCounter.end()!=pPartValuesGroupOld->m_mapPart_Prod_SatisfactionCounter.find(std::make_pair(iPart,static_cast<def::eProduct>(prod))))
+            {
+                Fl_Counter* pCountOld = pPartValuesGroupOld->m_mapPart_Prod_SatisfactionCounter.at(std::make_pair(iPart,static_cast<def::eProduct>(prod)));
+                pCountSatisf->value(pCountOld->value());
+            }
+
+            //std::string sName=std::to_string(iPart)+ " " +def::mapeProductNames.at(prod);
+            //m_map_pairPartProd_Name[std::make_pair(iPart,prod)]=sName;
+            pCountSatisf->label(pPartValuesGroupNew->m_map_pairPartProd_Name.at(std::make_pair(iPart,prod)).c_str());
+
+            pPartValuesGroupNew->add(pCountSatisf);
+
+            pPartValuesGroupNew->m_mapPart_Prod_SatisfactionCounter[std::make_pair(iPart,static_cast<def::eProduct>(prod))] = pCountSatisf;
+            //
+
+
+            //Consumption Amounts
+            Fl_Counter* pCountConsumpt = new Fl_Counter(1000,nYLast,100,20);
+            //nYLast = pCountProd->y()+pCountProd->h()+20;
+            pCountConsumpt->value(2.0);
+
+            if(pPartValuesGroupOld && pPartValuesGroupOld->m_mapPart_Prod_ConsumptionCounter.end()!=pPartValuesGroupOld->m_mapPart_Prod_ConsumptionCounter.find(std::make_pair(iPart,static_cast<def::eProduct>(prod))))
+            {
+                Fl_Counter* pCountOld = pPartValuesGroupOld->m_mapPart_Prod_ConsumptionCounter.at(std::make_pair(iPart,static_cast<def::eProduct>(prod)));
+                pCountConsumpt->value(pCountOld->value());
+            }
+
+            //std::string sName=std::to_string(iPart)+ " " +def::mapeProductNames.at(prod);
+            //m_map_pairPartProd_Name[std::make_pair(iPart,prod)]=sName;
+            pCountConsumpt->label(pPartValuesGroupNew->m_map_pairPartProd_Name.at(std::make_pair(iPart,prod)).c_str());
+
+            pPartValuesGroupNew->add(pCountConsumpt);
+
+            pPartValuesGroupNew->m_mapPart_Prod_ConsumptionCounter[std::make_pair(iPart,static_cast<def::eProduct>(prod))] = pCountConsumpt;
+            //
+
+
 
 
             nYLast = pCountInit->y()+pCountInit->h()+20;
@@ -110,16 +158,17 @@ CStock CMainDialog::StructPartiValuesGroup::GetInitStock(int nPartIndex)
 
     return stockPart;
 }
+
 //std::map<def::eProduct, double> GetPrCapacityMap
 std::map<def::eProduct, double> CMainDialog::StructPartiValuesGroup::GetPrCapacityMap(int nPartIndex)
 {
     std::map<def::eProduct,double> mapProd_ProductionAmount;
-    for (auto & pairPartProd_InitStock:m_mapPart_Prod_InitStockCounter)
+    for (auto & pairPartProd_Production:m_mapPart_Prod_ProductionCounter)
     {
-        std::pair<int,def::eProduct> pairPartProd = pairPartProd_InitStock.first;
+        std::pair<int,def::eProduct> pairPartProd = pairPartProd_Production.first;
         if(nPartIndex==pairPartProd.first)
         {
-            Fl_Counter* pflCounter = pairPartProd_InitStock.second;
+            Fl_Counter* pflCounter = pairPartProd_Production.second;
             double dAmount = pflCounter->value();
             mapProd_ProductionAmount[pairPartProd.second]=dAmount;
         }
@@ -127,6 +176,45 @@ std::map<def::eProduct, double> CMainDialog::StructPartiValuesGroup::GetPrCapaci
     //std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_ProductionCounter;
 
     return mapProd_ProductionAmount;
+}
+
+//std::map<def::eProduct, double> GetSatisfactionMap
+std::map<def::eProduct, double> CMainDialog::StructPartiValuesGroup::GetSatisfactionMap(int nPartIndex)
+{
+    std::map<def::eProduct,double> mapProd_SatisfactionAmount;
+    for (auto & pairPartProd_Satisfaction:m_mapPart_Prod_SatisfactionCounter)
+    {
+        std::pair<int,def::eProduct> pairPartProd = pairPartProd_Satisfaction.first;
+        if(nPartIndex==pairPartProd.first)
+        {
+            Fl_Counter* pflCounter = pairPartProd_Satisfaction.second;
+            double dAmount = pflCounter->value();
+            mapProd_SatisfactionAmount[pairPartProd.second]=dAmount;
+        }
+    }
+    //std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_ProductionCounter;
+
+    return mapProd_SatisfactionAmount;
+}
+
+
+//std::map<def::eProduct, double> GetConsumptionMap
+std::map<def::eProduct, double> CMainDialog::StructPartiValuesGroup::GetConsumptionMap(int nPartIndex)
+{
+    std::map<def::eProduct,double> mapProd_ConsumptionAmount;
+    for (auto & pairPartProd_Consumption:m_mapPart_Prod_ConsumptionCounter)
+    {
+        std::pair<int,def::eProduct> pairPartProd = pairPartProd_Consumption.first;
+        if(nPartIndex==pairPartProd.first)
+        {
+            Fl_Counter* pflCounter = pairPartProd_Consumption.second;
+            double dAmount = pflCounter->value();
+            mapProd_ConsumptionAmount[pairPartProd.second]=dAmount;
+        }
+    }
+    //std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_ProductionCounter;
+
+    return mapProd_ConsumptionAmount;
 }
 
 
@@ -429,7 +517,7 @@ void CMainDialog::NumPartUpdated(Fl_Widget* w)
 {
     std::cout << "NumPartUpdated" << std::endl;
 
-    StructPartiValuesGroup* pPartValuesGroupNew = new StructPartiValuesGroup(700,20,200,800);
+    StructPartiValuesGroup* pPartValuesGroupNew = new StructPartiValuesGroup(700,20,500,1100);
 
     //TODO:Cambiar todo esto por un método dentro de StructPartiValuesGroup:
 
@@ -621,14 +709,14 @@ void CMainDialog::LaunchEditedScenario(Fl_Widget* w)
         pParticipant->SetStock(stockInitPart);
 
         pParticipant->SetProductPrCapacityMap(m_psPartiValuesGroup->GetPrCapacityMap(iPart));
-
-        std::map<def::eProduct,double> mapeProd_dAmountOne;
-        mapeProd_dAmountOne[def::PROD_CLOTH]=1.0;
-        mapeProd_dAmountOne[def::PROD_FOOD]=1.0;
-        mapeProd_dAmountOne[def::PROD_GOLD]=1.0;
+//
+//        std::map<def::eProduct,double> mapeProd_dAmountOne;
+//        mapeProd_dAmountOne[def::PROD_CLOTH]=1.0;
+//        mapeProd_dAmountOne[def::PROD_FOOD]=1.0;
+//        mapeProd_dAmountOne[def::PROD_GOLD]=1.0;
         //TODO: Cargar lo siguiente también de algún widget
-        pParticipant->SetProductSatisfactionMap(mapeProd_dAmountOne);
-        pParticipant->SetProductConsumptionMap(mapeProd_dAmountOne);
+        pParticipant->SetProductSatisfactionMap(m_psPartiValuesGroup->GetSatisfactionMap(iPart));
+        pParticipant->SetProductConsumptionMap(m_psPartiValuesGroup->GetConsumptionMap(iPart));
 
         m_pMarket->AddParticipant(pParticipant);
     }
@@ -1157,7 +1245,7 @@ void CMainDialog::run()
 
         pCheckButton->value(1.0);
 
-        pCheckButton->callback((Fl_Callback*)CMainDialog::ViewResults);
+        pCheckButton->callback((Fl_Callback*)CMainDialog::ViewResults,(void*)this);
 
         pCheckButton->label(pairInfo_Name.second.c_str());
         //pCheckButton->label("m_mapInfo_cbShow");

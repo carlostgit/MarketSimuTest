@@ -141,9 +141,13 @@ class CMainDialog
 
             CStock GetInitStock(int nPartIndex);
             std::map<def::eProduct, double> GetPrCapacityMap(int nPartIndex);
+            std::map<def::eProduct, double> GetSatisfactionMap(int nPartIndex);
+            std::map<def::eProduct, double> GetConsumptionMap(int nPartIndex);
 
             std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_InitStockCounter;
             std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_ProductionCounter;
+            std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_SatisfactionCounter;
+            std::map<std::pair<int,def::eProduct>,Fl_Counter*> m_mapPart_Prod_ConsumptionCounter;
             std::map<std::pair<int,int>,std::string> m_map_pairPartProd_Name;
         }* m_psPartiValuesGroup;
 
