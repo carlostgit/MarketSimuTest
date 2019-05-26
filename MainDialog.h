@@ -5,19 +5,25 @@
 #include <vector>
 #include <map>
 #include <memory>
-class CMarket;
+
+#include <FL/Fl_Group.H>
+#include <FL/Fl_Scroll.H>
+#include <FL/Fl_Window.H>
 
 class Fl_Widget;
 class Fl_Chart;
-class Fl_Window;
-class Fl_Scroll;
+//class Fl_Window;
+//class Fl_Scroll;
 //class Fl_Group;
-#include <FL/Fl_Group.H>
-#include <FL/Fl_Scroll.H>
+
 class Fl_Counter;
 class Fl_Check_Button;
+class Fl_Box;
+class Fl_Button;
 
+class CMarket;
 class CStock;
+class CParticipant;
 
 class CMainDialog
 {
@@ -50,6 +56,8 @@ class CMainDialog
         void run();
 
         static void Destroy(Fl_Widget* w, void* pvoidMarket);
+        static void Calculator(Fl_Widget* w, void* pvoidMainDialog);
+        void Calculator(Fl_Widget* w);
         static void Reset(Fl_Widget* w, void* pvoidMarket);
         static void Step(Fl_Widget* w, void* pvoidMarket);
         static void LaunchScenario_1(Fl_Widget* w, void* v);
@@ -126,6 +134,14 @@ class CMainDialog
         //Número de participantes para las condiciones iniciales
         Fl_Counter* m_pCounterNumPartValue;
 
+        //Precios iniciales
+        struct StructInitPrices
+        {
+            std::map<def::eProduct, double> GetInitPricesMap();
+            std::map<def::eProduct,Fl_Counter*> m_mapProd_cInitPrice;
+        } m_sInitPrices;
+
+
         //Controles para condiciones iniciales:
         struct StructPartiValuesGroup: public Fl_Scroll
         {
@@ -151,6 +167,57 @@ class CMainDialog
             std::map<std::pair<int,int>,std::string> m_map_pairPartProd_Name;
         }* m_psPartiValuesGroup;
 
+        //
+
+        //Calculadora
+        struct StructCalculator: public Fl_Window
+        {
+
+            StructCalculator();//:Fl_Window(0,0,1000,1000)
+
+            static void CalcSatisf(Fl_Widget* w, void* pvoidStructCalculator);
+            void CalcSatisf();
+            static void CalcConsumpt(Fl_Widget* w, void* pvoidStructCalculator);
+            void CalcConsumpt();
+            static void CalcProduction(Fl_Widget* w, void* pvoidStructCalculator);
+            void CalcProduction();
+
+            struct TestMarketWithParticipant
+            {
+                TestMarketWithParticipant(StructCalculator* pStructCalc);
+                ~TestMarketWithParticipant();
+                CParticipant* GetParticipantRef(){return m_pParticipant;}
+                CMarket* GetMarketRef(){return m_pMarket;}
+
+                CParticipant *m_pParticipant;
+                CMarket *m_pMarket;
+            };
+
+            //std::map<def::eProduct,Fl_Counter*> m_mapPrices;
+            std::map<def::eProduct,Fl_Counter*> m_mapStock;
+            //std::map<def::eProduct,Fl_Counter*> m_mapNewProducts;
+
+            Fl_Box* m_pBoxOfResults;
+
+            Fl_Box* m_pBoxPrices;
+            Fl_Box* m_pBoxStock;
+            Fl_Box* m_pBoxProduction;
+            Fl_Box* m_pBoxConsumption;
+            Fl_Box* m_pBoxSatisfaction;
+            Fl_Box* m_pBox6;
+
+            std::map<def::eProduct,Fl_Counter*> m_mapProd_CounterPrices;
+            std::map<def::eProduct,Fl_Counter*> m_mapProd_CounterStock;
+            std::map<def::eProduct,Fl_Counter*> m_mapProd_CounterProduction;
+            std::map<def::eProduct,Fl_Counter*> m_mapProd_CounterConsumption;
+            std::map<def::eProduct,Fl_Counter*> m_mapProd_CounterSatisfaction;
+            std::map<def::eProduct,Fl_Counter*> m_mapProd_Counter6;
+
+            Fl_Button* m_butCalcSatisf;
+            Fl_Button* m_butCalcConsumpt;
+            Fl_Button* m_butCalcProduction;
+
+        }* m_psCalculator;
         //
 
         Fl_Window *m_pWindow;

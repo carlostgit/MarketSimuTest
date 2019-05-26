@@ -127,6 +127,8 @@ CStock CParticipant::DemandProducts(const CPricesInfo* pricinfoPrices, const CSt
 
     std::vector<def::eProduct> vProds = (*pStockAfterSaleOfPartic).GetProducts();
 
+    //Esto creo que es un bug. Creo que debería usarse def::vProducts en vez de vProds
+
     std::ofstream myOfStream;
     if(PRINT)
     {
@@ -179,6 +181,163 @@ CStock CParticipant::DemandProducts(const CPricesInfo* pricinfoPrices, const CSt
     return stockToBuy;
 }
 
+
+//
+
+CStock CParticipant::DemandProducts2(const CPricesInfo* pricinfoPrices, const CStock* pStockAfterSaleOfPartic, def::eProduct* pProdPurchaseCurrency) const
+{
+    //Se maximizará: Satisf = satisfA + satisfB + satisfC + (satisfA*satisfB + satisfA*satisfC + satisfB*satisfC)/(satisfA + satisfB + satisfC);
+    //Donde: satisfA = numProdA*satisfPerA;
+    //Todo: Una siguiente idea podría ser agrupar los productos en categorías (categorías A, B, o C), y límitar el número de productos por categoria,
+    //de tal forma que si sobran los recursos se tienda a demandar productos de más categoría para maximizar la satisfacción
+    //
+
+    CStock stockToBuy;
+
+    def::eProduct epPurchaseCurrency=def::PROD_GOLD;
+    (*pProdPurchaseCurrency) = def::PROD_GOLD;
+
+    std::vector<def::eProduct> vInitProds = (*pStockAfterSaleOfPartic).GetProducts();
+
+    //std::vector<long> vnCategories = def::GetCategoriesOfStock();
+
+    std::vector<def::eProduct> vProductsToBuy;
+    CStock stockProductsToBuy;
+    double dAmountOfMoney = pStockAfterSaleOfPartic->GetAmount(*pProdPurchaseCurrency);
+    double dRemainingMoney=dAmountOfMoney;
+    bool bFinish=false;
+    while (!bFinish)
+    {
+        def::eProduct eProdCandidate=def::vProducts.front();
+        bool bCanBuyAnyProduct=false;
+
+        double dMaxSatisfPerCost=0.0;
+        def::eProduct epSelectectProd=def::NON_IDENTIFIED_PRODUCT;
+        for(auto & prod: def::vProducts)
+        {
+            bool bCanBuyProduct=false;
+            double dPriceOfProd = pricinfoPrices->GetPrice(epPurchaseCurrency,prod);
+            if(dPriceOfProd<=dRemainingMoney)
+            {
+                bCanBuyProduct=true;
+                bCanBuyAnyProduct=true;
+            }
+
+            if (bCanBuyProduct)
+            {
+                //satisf per cost
+                double dProdSatisf = m_mapeProd_dSatisf.at(prod);
+//                double dSatisfPerCost = dProdSatisf/dPriceOfProd;
+//                if (dSatisfPerCost>dMaxSatisfPerCost)
+//                    epSelectectProd=prod;
+                const CStock& stockWithoutCandidate = stockProductsToBuy;
+                CStock stockWithCandidate=stockProductsToBuy;
+                stockWithCandidate.AddAmount(prod,1.0);
+
+                //todo
+
+                double dSatisfWithoutCandidate = GetSatisfactionOfStock(&stockWithoutCandidate);
+                double dSatisfWithCandidate = GetSatisfactionOfStock(&stockWithCandidate);
+                double dSatisfPerCost = (dSatisfWithCandidate-dSatisfWithoutCandidate)/dPriceOfProd;
+
+                if (dSatisfPerCost>dMaxSatisfPerCost)
+                {
+                    dMaxSatisfPerCost = dSatisfPerCost;
+                    epSelectectProd=prod;
+                }
+
+
+////                double GetSatisfactionOfStock(stockWithCandidate)
+////                {
+////                    satisf
+////                    for(stockWithCandidate.GetMap())
+////                    {
+////                        satisfA= numOfAProds*m_mapeProd_dSatisf.at(prodA);
+////                        satisfB= ...
+////
+////                        Satisf = satisfA + satisfB + satisfC + (satisfA*satisfB + satisfA*satisfC + satisfB*satisfC)/(satisfA + satisfB + satisfC);
+////                    }
+////                 }
+//                satifWithCandi
+//                for(stockWithoutCandidate.GetMap())
+//                {
+//                    ...
+//                    SatisfWithCandi = satisfA + satisfB + satisfC + (satisfA*satisfB + satisfA*satisfC + satisfB*satisfC)/(satisfA + satisfB + satisfC);
+//                }
+//                //satisfPerCost = (satifWithCandi-Satisf)/dPriceOfCandi;
+//                if satisfPerCost>maxSatisfPerCost
+//                    epSelectedProd=prod;
+//
+//
+            }
+
+        }
+
+        if (false==bCanBuyAnyProduct)
+        {
+            bFinish=true;
+        }
+        else
+        {
+            stockProductsToBuy.AddAmount(eProdCandidate,1.0);
+        }
+
+    }
+
+//    std::ofstream myOfStream;
+//    if(PRINT)
+//    {
+//        myOfStream.open("CParticipant_DemandProducts.txt");
+//    }
+//
+//    def::eProduct eprodToBuy = *(std::max_element(vProds.begin(),vProds.end(),[&](def::eProduct peprodA, def::eProduct peprodB)
+//        {//Max satisfaction per $ function
+//            def::eProduct prodA=(peprodA);
+//            def::eProduct prodB=(peprodB);
+//            double dValueA = this->GetSatisfactionOfProduct(prodA);
+//            double dValueB = this->GetSatisfactionOfProduct(prodB);
+//            double dPriceA = pricinfoPrices->GetPrice((*pProdPurchaseCurrency),prodA);
+//            double dPriceB = pricinfoPrices->GetPrice((*pProdPurchaseCurrency),prodB);
+//            double dValuePerPriceA = dValueA/dPriceA;
+//            double dValuePerPriceB = dValueB/dPriceB;
+//
+//            if (PRINT)
+//            {
+//                myOfStream << "dValuePerPriceA " << def::mapeProductNames.at(prodA) << " " <<dValuePerPriceA<< "\n";
+//                myOfStream << "dValuePerPriceB " << def::mapeProductNames.at(prodB) << " " <<dValuePerPriceB<< "\n";
+//            }
+//
+//            return dValuePerPriceA<dValuePerPriceB;
+//        }
+//        ));
+//
+//        //TODO: sustituir lo anterior por algo como lo siguiente
+//        //FMaxSatisfactinPerCost functMaxSati(this, pricinfoPrices);
+//    //def::eProduct eprodToBuy = *(std::max_element(vProds.begin(),vProds.end(),functMaxSati));
+//
+//    double dPriceOfProdToBuy = pricinfoPrices->GetPrice((*pProdPurchaseCurrency),eprodToBuy);
+//    double dAmountOfMoney = pStockAfterSaleOfPartic->GetAmount(*pProdPurchaseCurrency);
+//
+//    long nAmountOfProductsToBuy = dAmountOfMoney/dPriceOfProdToBuy;
+//
+//    CStock stockToBuy;
+//    stockToBuy.Set(eprodToBuy, nAmountOfProductsToBuy);
+//
+//    if(PRINT)
+//    {
+//        myOfStream << "eprodToBuy " << def::mapeProductNames.at(eprodToBuy) << " " <<nAmountOfProductsToBuy<< "\n";
+//
+//        myOfStream.close();
+//    }
+//
+//    //TODO: En el futuro el método debería ir haciendo sl stock demandado unidad a unidad,
+//    //porque el método GetSatisfactionOfProduct dependerá del Stock. (El Stock actual + el stock que se está demandando)
+
+    return stockToBuy;
+}
+//
+
+
 double CParticipant::GetSatisfactionOfProduct(def::eProduct eprod) const
 {
     //std::map<def::eProduct, double> m_mapeProd_dSatisf;
@@ -195,6 +354,80 @@ double CParticipant::GetSatisfactionOfProduct(def::eProduct eprod) const
         return 0.0;
     }
 }
+
+//double CParticipant::GetSatisfactionOfStock(const CStock* pStock) const
+//{
+//    //Use: m_mapeProd_dSatisf
+//
+//    if(pStock)
+//    {
+//        double dTotalSatisfaction=0.0;
+//        std::map<def::eProduct,double> mapProd_Amount = pStock->GetProductAmountMap();
+//
+//        for (auto& pairProd_Amount:mapProd_Amount)
+//        {
+//            double dProdSatisfaction = m_mapeProd_dSatisf.at(pairProd_Amount.first)*pairProd_Amount.second;
+//            dTotalSatisfaction+=dProdSatisfaction;
+//
+//        }
+//        return dTotalSatisfaction;
+//    }
+//    else
+//    {
+//        return 0.0;
+//    }
+//}
+
+double CParticipant::GetSatisfactionOfStock(const CStock* pStock) const
+{
+    double dSatisf=0.0;
+
+
+    std::vector<std::pair<def::eProduct,def::eProduct>> vpairProdA_ProdB;
+
+    for (int indexA=0;indexA<def::vProducts.size();indexA++)
+    {
+        def::eProduct prodA=def::vProducts.at(indexA);
+
+        for (int indexB=indexA;indexB<def::vProducts.size();indexB++)
+        {
+            def::eProduct prodB=def::vProducts.at(indexB);
+            vpairProdA_ProdB.push_back(std::make_pair(prodA,prodB));
+        }
+    }
+
+
+    std::map<def::eProduct, double> mapProd_Satisf;
+    for (auto & prod:def::vProducts)
+    {
+        mapProd_Satisf[prod]=pStock->GetAmount(prod)*m_mapeProd_dSatisf.at(prod);
+    }
+
+    double dSatisfSum=0.0;
+    for (auto & pairProdSatisf:mapProd_Satisf)
+    {
+        dSatisfSum += pairProdSatisf.second;
+    }
+
+    double dSatisfSumOfPairProducts=0.0;
+    for(auto& pairProdA_ProdB:vpairProdA_ProdB)
+    {
+        auto prodA = pairProdA_ProdB.first;
+        double dSatisfPerA = m_mapeProd_dSatisf.at(prodA);
+        auto prodB = pairProdA_ProdB.second;
+        double dSatisfPerB = m_mapeProd_dSatisf.at(prodB);
+
+        dSatisfSumOfPairProducts += prodA*dSatisfPerA*prodB*dSatisfPerB;
+    }
+
+    dSatisf = dSatisfSum + dSatisfSumOfPairProducts/dSatisfSum;
+
+    //Satisf = satisfA + satisfB + satisfC + (satisfA*satisfB + satisfA*satisfC + satisfB*satisfC)/(satisfA + satisfB + satisfC);
+    //Satisf = satisfSum + satisfSumOfPairProducts/satisfSum
+
+//    }
+}
+
 
 void CParticipant::AddProductsForNextCycle(CStock stock)
 {
@@ -221,6 +454,7 @@ CStock CParticipant::CalculateProduction(const CPricesInfo* pricinfoPrices) cons
 
     return stockProduced;
 }
+
 
 double CParticipant::GetPrCapacityOfProduct(def::eProduct eprod) const
 {
@@ -276,6 +510,12 @@ CStock CParticipant::CalculateConsumption(const CStock* pownedStock) const
 
     return stockToBeConsumed;
 }
+
+CStock CParticipant::CalculateConsumption() const
+{
+    return CalculateConsumption(&this->m_Stock);
+}
+
 double CParticipant::GetConsumptionOfProduct(def::eProduct eprod) const
 {
     if(m_mapeProd_dConsumption.end()!=m_mapeProd_dConsumption.find(eprod))

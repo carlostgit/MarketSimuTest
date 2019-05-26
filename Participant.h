@@ -35,7 +35,7 @@ public:
     //Satisfaction:
     double GetSatisfactionOfProduct(def::eProduct eprod) const;
     //TODO el método deberíaa tener un CStock te argumento en el futuro, porque la satisfacción de un producto dependerá de los que ya se tienen
-    //double GetSatisfactionOfStock(const CStock* pStock) const; //TODO
+    double GetSatisfactionOfStock(const CStock* pStock) const;
 
     void SetProductSatisfactionMap(std::map<def::eProduct, double> mapeProd_dSatisf)
     {
@@ -48,6 +48,7 @@ public:
     //Transaction:
     CStock OfferProducts(const CPricesInfo* pricinfoPrices, const CStock* pStockIniOfPartic, def::eProduct* pProdSaleCurrency) const;
     CStock DemandProducts(const CPricesInfo* pricinfoPrices, const CStock* pStockAfterSaleOfPartic, def::eProduct* pProdPurchaseCurrency) const;
+    CStock DemandProducts2(const CPricesInfo* pricinfoPrices, const CStock* pStockAfterSaleOfPartic, def::eProduct* pProdPurchaseCurrency) const;
 
     //
     void StepAfterTransaction(const CPricesInfo* pricinfoPrices);
@@ -67,6 +68,7 @@ public:
 
     //Consumption
     CStock CalculateConsumption(const CStock* ownedStock) const;
+    CStock CalculateConsumption() const;
     double GetConsumptionOfProduct(def::eProduct eprod) const;
     void SetProductConsumptionMap(std::map<def::eProduct, double> mapeProd_dConsumption)
     {

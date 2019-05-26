@@ -20,14 +20,221 @@
 #include "PricesInfo.h"
 #include "Ledger.h"
 
+CMainDialog::StructCalculator::TestMarketWithParticipant::TestMarketWithParticipant(CMainDialog::StructCalculator* pStructCalc):
+    m_pParticipant(nullptr),
+    m_pMarket(nullptr)
+{
+    m_pMarket = new CMarket();
 
+    m_pParticipant = new CParticipant();
+
+    m_pMarket->AddParticipant(m_pParticipant);
+
+    std::map<def::eProduct,double> mapPart_1_eProd_dAmount;
+    mapPart_1_eProd_dAmount[def::PROD_CLOTH] = pStructCalc->m_mapProd_CounterStock.at(def::PROD_CLOTH)->value();
+    mapPart_1_eProd_dAmount[def::PROD_FOOD] = pStructCalc->m_mapProd_CounterStock.at(def::PROD_FOOD)->value();
+    mapPart_1_eProd_dAmount[def::PROD_GOLD] = pStructCalc->m_mapProd_CounterStock.at(def::PROD_GOLD)->value();
+    CStock stockPart1(mapPart_1_eProd_dAmount);
+    m_pParticipant->SetStock(stockPart1);
+
+    std::map<def::eProduct,double> mapeProd_dAmount;
+    mapeProd_dAmount[def::PROD_CLOTH] = pStructCalc->m_mapProd_CounterPrices.at(def::PROD_CLOTH)->value();
+    mapeProd_dAmount[def::PROD_FOOD] = pStructCalc->m_mapProd_CounterPrices.at(def::PROD_FOOD)->value();
+    mapeProd_dAmount[def::PROD_GOLD] = pStructCalc->m_mapProd_CounterPrices.at(def::PROD_GOLD)->value();
+
+    CStock stock(mapeProd_dAmount);
+
+    CPricesInfo pricesInfo;
+    pricesInfo.SetStockForPrices(stock);
+    m_pMarket->SetPricesInfo(pricesInfo);
+
+    std::map<def::eProduct, double> mapeProd_dSatisf;
+    mapeProd_dSatisf[def::PROD_CLOTH] = pStructCalc->m_mapProd_CounterSatisfaction.at(def::PROD_CLOTH)->value();
+    mapeProd_dSatisf[def::PROD_FOOD] = pStructCalc->m_mapProd_CounterSatisfaction.at(def::PROD_FOOD)->value();
+    mapeProd_dSatisf[def::PROD_GOLD] = pStructCalc->m_mapProd_CounterSatisfaction.at(def::PROD_GOLD)->value();
+    m_pParticipant->SetProductSatisfactionMap(mapeProd_dSatisf);
+
+    std::map<def::eProduct, double> mapeProd_dConsumpt;
+    mapeProd_dConsumpt[def::PROD_CLOTH] = pStructCalc->m_mapProd_CounterConsumption.at(def::PROD_CLOTH)->value();
+    mapeProd_dConsumpt[def::PROD_FOOD] = pStructCalc->m_mapProd_CounterConsumption.at(def::PROD_FOOD)->value();
+    mapeProd_dConsumpt[def::PROD_GOLD] = pStructCalc->m_mapProd_CounterConsumption.at(def::PROD_GOLD)->value();
+    m_pParticipant->SetProductConsumptionMap(mapeProd_dConsumpt);
+
+    std::map<def::eProduct, double> mapeProd_dProduction;
+    mapeProd_dProduction[def::PROD_CLOTH] = pStructCalc->m_mapProd_CounterProduction.at(def::PROD_CLOTH)->value();
+    mapeProd_dProduction[def::PROD_FOOD] = pStructCalc->m_mapProd_CounterProduction.at(def::PROD_FOOD)->value();
+    mapeProd_dProduction[def::PROD_GOLD] = pStructCalc->m_mapProd_CounterProduction.at(def::PROD_GOLD)->value();
+    m_pParticipant->SetProductPrCapacityMap(mapeProd_dProduction);
+    //Fin de carga de datos
+}
+CMainDialog::StructCalculator::TestMarketWithParticipant::~TestMarketWithParticipant()
+{
+
+    delete m_pParticipant;
+    delete m_pMarket;
+}
+
+void CMainDialog::StructCalculator::CalcSatisf(Fl_Widget* w, void* pvoidStructCalculator)
+{
+    std::cout << "static CalcSatisf" << std::endl;
+    StructCalculator* pStructCalculator = static_cast<StructCalculator*>(pvoidStructCalculator);
+    pStructCalculator->CalcSatisf();
+}
+void CMainDialog::StructCalculator::CalcSatisf()
+{
+    std::cout << "non static CalcSatisf" << std::endl;
+
+    //Carga de datos
+    TestMarketWithParticipant testMarket(this);
+    m_pBoxOfResults->label("TODO: Tengo que cambiar lo de GetSatisfactionOfProduct");
+}
+
+void CMainDialog::StructCalculator::CalcConsumpt(Fl_Widget* w, void* pvoidStructCalculator)
+{
+    std::cout << "static CalcConsumpt" << std::endl;
+    StructCalculator* pStructCalculator = static_cast<StructCalculator*>(pvoidStructCalculator);
+    pStructCalculator->CalcConsumpt();
+}
+void CMainDialog::StructCalculator::CalcConsumpt()
+{
+    std::cout << "non static CalcConsumpt" << std::endl;
+
+    TestMarketWithParticipant testMarket(this);
+    CStock stock = testMarket.GetParticipantRef()->CalculateConsumption();
+    static std::string resultsLabel=""; //chapu. debería hacer otra cosa aquí. Quizá usar una variable miembro
+
+
+    resultsLabel="";
+    for (auto & prod:def::vProducts)
+    {
+        resultsLabel=resultsLabel+" "+std::to_string(stock.GetAmount(prod));
+
+    }
+
+    m_pBoxOfResults->label(resultsLabel.c_str());
+}
+
+void CMainDialog::StructCalculator::CalcProduction(Fl_Widget* w, void* pvoidStructCalculator)
+{
+    std::cout << "static CalcProduction" << std::endl;
+    StructCalculator* pStructCalculator = static_cast<StructCalculator*>(pvoidStructCalculator);
+    pStructCalculator->CalcProduction();
+}
+
+
+void CMainDialog::StructCalculator::CalcProduction()
+{
+    std::cout << "non static CalcProduction" << std::endl;
+
+    TestMarketWithParticipant testMarket(this);
+    CPricesInfo pricesInfo = testMarket.GetMarketRef()->GetPricesInfo();
+    CStock stock = testMarket.GetParticipantRef()->CalculateProduction(&pricesInfo);
+
+    static std::string resultsLabel=""; //chapu. debería hacer otra cosa aquí. Quizá usar una variable miembro
+
+
+    resultsLabel="";
+    for (auto & prod:def::vProducts)
+    {
+        resultsLabel=resultsLabel+" "+std::to_string(stock.GetAmount(prod));
+
+    }
+
+    m_pBoxOfResults->label(resultsLabel.c_str());
+
+}
+
+
+CMainDialog::StructCalculator::StructCalculator():
+    Fl_Window(20,20,500,500)
+{
+
+    long nProdCounter=0;
+
+    long nLastY = this->y();
+
+    Fl_Box* pboxNumOfPart = new Fl_Box(this->x(),nLastY,100,30);
+    static std::string sNumOfPart = "CParticipant Tests";
+    pboxNumOfPart ->label(sNumOfPart.c_str());
+    nLastY =pboxNumOfPart->y()+pboxNumOfPart->h();
+
+    for (auto & prod:def::vProducts)
+    {
+        m_mapProd_CounterPrices[prod] = new Fl_Counter(nProdCounter*100,nLastY + 10,100,30);
+        m_mapProd_CounterPrices.at(prod)->value(1.0);
+        m_mapProd_CounterPrices.at(prod)->label(def::mapeProductNames.at(prod).c_str());
+        m_pBoxPrices = new Fl_Box(300,nLastY + 10,200,30);
+        m_pBoxPrices->label("box 1: Market Prices");
+
+        m_mapProd_CounterStock[prod] = new Fl_Counter(nProdCounter*100,nLastY + 40,100,30);
+        m_mapProd_CounterStock.at(prod)->label(def::mapeProductNames.at(prod).c_str());
+        m_mapProd_CounterStock.at(prod)->value(1.0);
+        m_pBoxStock = new Fl_Box(300,nLastY + 40,200,30);
+        m_pBoxStock->label("box 2: Stock");
+
+        m_mapProd_CounterProduction[prod] = new Fl_Counter(nProdCounter*100,nLastY + 70,100,30);
+        m_mapProd_CounterProduction.at(prod)->label(def::mapeProductNames.at(prod).c_str());
+        m_mapProd_CounterProduction.at(prod)->value(1.0);
+        m_pBoxProduction = new Fl_Box(300,nLastY + 70,200,30);
+        m_pBoxProduction->label("box 3: Production Matrix");
+
+        m_mapProd_CounterConsumption[prod] = new Fl_Counter(nProdCounter*100,nLastY + 100,100,30);
+        m_mapProd_CounterConsumption.at(prod)->label(def::mapeProductNames.at(prod).c_str());
+        m_mapProd_CounterConsumption.at(prod)->value(1.0);
+        m_pBoxConsumption = new Fl_Box(300,nLastY + 100,200,30);
+        m_pBoxConsumption->label("box 4: Consumption Matrix");
+
+        m_mapProd_CounterSatisfaction[prod] = new Fl_Counter(nProdCounter*100,nLastY + 130,100,30);
+        m_mapProd_CounterSatisfaction.at(prod)->label(def::mapeProductNames.at(prod).c_str());
+        m_mapProd_CounterSatisfaction.at(prod)->value(1.0);
+        m_pBoxSatisfaction = new Fl_Box(300,nLastY + 130,200,30);
+        m_pBoxSatisfaction->label("box 5: Satisfaction Matrix");
+
+        m_mapProd_Counter6[prod] = new Fl_Counter(nProdCounter*100,nLastY + 160,100,30);
+        m_mapProd_Counter6.at(prod)->label(def::mapeProductNames.at(prod).c_str());
+        m_pBox6 = new Fl_Box(300,nLastY + 160,200,30);
+        m_pBox6->label("box 6");
+
+        nProdCounter++;
+    }
+
+    nLastY=m_mapProd_Counter6.at(def::vProducts.front())->y()+m_mapProd_Counter6.at(def::vProducts.front())->h();
+
+
+    m_pBoxOfResults = new Fl_Box(10,nLastY,400,100);
+    m_pBoxOfResults->label("Resultados bla blallldlk alkd ald la ldkalfañjf 5245");
+    nLastY += m_pBoxOfResults->h();
+    m_butCalcSatisf = new Fl_Button(50,nLastY,200,20,"Calc. Satisfaction");
+    m_butCalcSatisf->callback((Fl_Callback*)CMainDialog::StructCalculator::CalcSatisf, (void*)this);
+
+    nLastY += m_butCalcSatisf->h();
+    m_butCalcConsumpt = new Fl_Button(50,nLastY,200,20,"Calc. Consumption");
+    m_butCalcConsumpt->callback((Fl_Callback*)CMainDialog::StructCalculator::CalcConsumpt, (void*)this);
+
+    nLastY += m_butCalcConsumpt->h();
+    m_butCalcProduction = new Fl_Button(50,nLastY,200,20,"Calc. Production");
+    m_butCalcProduction->callback((Fl_Callback*)CMainDialog::StructCalculator::CalcProduction, (void*)this);
+
+}
+
+std::map<def::eProduct, double> CMainDialog::StructInitPrices::GetInitPricesMap()
+{
+    std::map<def::eProduct, double> rInitPricesMap;
+    //std::map<def::eProduct,Fl_Check_Button*> m_mapProd_cInitPrice;
+    for(auto & pairProd_FlCheckBut:m_mapProd_cInitPrice)
+    {
+        rInitPricesMap[pairProd_FlCheckBut.first] = pairProd_FlCheckBut.second->value();
+    }
+
+    return rInitPricesMap;
+}
 
 void CMainDialog::StructPartiValuesGroup::InitPartiValuesControls(StructPartiValuesGroup* pPartValuesGroupNew,
                                         long nNumOfParticipants,
                                         StructPartiValuesGroup* pPartValuesGroupOld
                                         )
 {
-    long nYLast=20;
+    long nYLast=120;
 
     Fl_Box* pBox1 = new Fl_Box(700,nYLast,100,20);
     pBox1->label("Stock Ini");
@@ -496,7 +703,8 @@ CMainDialog::CMainDialog():
     m_pCounterLastStep(nullptr),
     //m_pPartValuesGroup(nullptr),
     m_psPartiChartGroup(nullptr),
-    m_psPartiValuesGroup(nullptr)
+    m_psPartiValuesGroup(nullptr),
+    m_psCalculator(nullptr)
 {
     //ctor
 }
@@ -517,7 +725,7 @@ void CMainDialog::NumPartUpdated(Fl_Widget* w)
 {
     std::cout << "NumPartUpdated" << std::endl;
 
-    StructPartiValuesGroup* pPartValuesGroupNew = new StructPartiValuesGroup(700,20,500,1100);
+    StructPartiValuesGroup* pPartValuesGroupNew = new StructPartiValuesGroup(700,100,500,1100);
 
     //TODO:Cambiar todo esto por un método dentro de StructPartiValuesGroup:
 
@@ -627,6 +835,29 @@ void CMainDialog::Destroy(Fl_Widget* w, void* pvoidMarket)
     (*pupMarket).reset();
 }
 
+void CMainDialog::Calculator(Fl_Widget* w, void* pvoidMainDialog)
+{
+    std::cout << "Calculator" << std::endl;
+    CMainDialog* pMainDialog = static_cast<CMainDialog*>(pvoidMainDialog);
+    pMainDialog->Calculator(w);
+}
+
+void CMainDialog::Calculator(Fl_Widget* w)
+{
+    std::cout << "Calculator non static" << std::endl;
+
+    m_pScroll->end();
+    m_pWindow->end(); //Si no pongo esto, la nueva ventana queda integrada en la antigua
+
+    if(m_pMarket.get())
+    {
+        m_psCalculator = new StructCalculator();
+
+        m_psCalculator->show();
+    }
+
+}
+
 
 
 void CMainDialog::Reset(Fl_Widget* w, void* pvoidMarket)
@@ -682,25 +913,7 @@ void CMainDialog::LaunchEditedScenario(Fl_Widget* w)
 
     for (auto & iPart:setPartIndex)
     {
-//        std::map<def::eProduct,double> mapProd_InitStockAmount;
-//        //long iPart = pairPartIndex_Info.first;
-//        for (auto & pairPartProd_InitStock:m_psPartiValuesGroup->m_mapPart_Prod_InitStockCounter)
-//        {
-//            std::pair<int,def::eProduct> pairPartProd = pairPartProd_InitStock.first;
-//            Fl_Counter* pflCounter = pairPartProd_InitStock.second;
-//            double dAmount = pflCounter->value();
-//            mapProd_InitStockAmount[pairPartProd.second]=dAmount;
-//        }
-//
-//        std::map<def::eProduct,double> mapProd_ProductionAmount;
-//        //TODO. Cargar esto con los datos del dialogo (m_mapPart_Prod_ProductionCounter)
-//        for (auto & pairPartProd_Production:m_psPartiValuesGroup->m_mapPart_Prod_ProductionCounter)
-//        {
-//            std::pair<int,def::eProduct> pairPartProd = pairPartProd_Production.first;
-//            Fl_Counter* pflCounter = pairPartProd_Production.second;
-//            double dAmount = pflCounter->value();
-//            mapProd_ProductionAmount[pairPartProd.second]=dAmount;
-//        }
+
 
         CParticipant* pParticipant = new CParticipant();
 
@@ -709,12 +922,6 @@ void CMainDialog::LaunchEditedScenario(Fl_Widget* w)
         pParticipant->SetStock(stockInitPart);
 
         pParticipant->SetProductPrCapacityMap(m_psPartiValuesGroup->GetPrCapacityMap(iPart));
-//
-//        std::map<def::eProduct,double> mapeProd_dAmountOne;
-//        mapeProd_dAmountOne[def::PROD_CLOTH]=1.0;
-//        mapeProd_dAmountOne[def::PROD_FOOD]=1.0;
-//        mapeProd_dAmountOne[def::PROD_GOLD]=1.0;
-        //TODO: Cargar lo siguiente también de algún widget
         pParticipant->SetProductSatisfactionMap(m_psPartiValuesGroup->GetSatisfactionMap(iPart));
         pParticipant->SetProductConsumptionMap(m_psPartiValuesGroup->GetConsumptionMap(iPart));
 
@@ -722,11 +929,12 @@ void CMainDialog::LaunchEditedScenario(Fl_Widget* w)
     }
 
 
-    std::map<def::eProduct,double> mapeProd_dAmount;
-    mapeProd_dAmount[def::PROD_CLOTH]=1.0;
-    mapeProd_dAmount[def::PROD_FOOD]=1.0;
-    mapeProd_dAmount[def::PROD_GOLD]=1.0;
-    CStock stock(mapeProd_dAmount);
+//    std::map<def::eProduct,double> mapeProd_dAmount;
+//    mapeProd_dAmount[def::PROD_CLOTH]=1.0;
+//    mapeProd_dAmount[def::PROD_FOOD]=1.0;
+//    mapeProd_dAmount[def::PROD_GOLD]=1.0;
+
+    CStock stock(m_sInitPrices.GetInitPricesMap());
 
     //TODO: Acordarme de probar a compilar y lanzar en el PC de sobremesa el proyecto con las librerías de 32 bits
     //TODO: Acordarme de crear 2 proyectos. 1 con librerías externas para 32 bits, y otro para librerías para 64
@@ -1217,6 +1425,13 @@ void CMainDialog::run()
 
     nYLast=butDestroy->y()+butDestroy->h();
 
+    Fl_Button* butCalculator = new Fl_Button(100,nYLast,100,20,"Calculator");
+    butCalculator->callback((Fl_Callback*)CMainDialog::Calculator, (void*)this);
+    this->m_pScroll->add(butCalculator);
+
+    nYLast=butCalculator->y()+butCalculator->h();
+
+
     m_pCounterZoomValue = new Fl_Counter(350,230,100,20);
     m_pCounterZoomValue->value(1.0);
     m_pCounterZoomValue->label("Zoom");
@@ -1287,22 +1502,21 @@ void CMainDialog::run()
     m_pScroll->add(m_pCounterNumPartValue);
     m_pCounterNumPartValue->do_callback();
 
-//    m_pPartValuesGroup = new Fl_Group(100,360,100,500);
-//
-//    int nPart=m_pCounterNumPartValue->value();
-//    for(int iPart=0;iPart<nPart;iPart++)
-//    {
-//        for(auto& prod:def::vProducts)
-//        {
-//            Fl_Counter* pCount = new Fl_Counter(100,nYLast,100,20);
-//            nYLast = pCount->y()+pCount->h()+20;
-//            pCount->value(2.0);
-//            pCount->label(def::mapeProductNames.at(prod).c_str());
-//
-//            m_pPartValuesGroup->add(pCount);
-//            m_mapPart_Prod_cbShow[std::make_pair(iPart,static_cast<def::eProduct>(prod))] = pCount;
-//        }
-//    }
+
+    //Precios iniciales
+    //std::map<def::eProduct,Fl_Check_Button*> m_mapProd_cInitPrice;
+    Fl_Box* pInitPricesLabel = new Fl_Box(700,20,100,20,"Init Prices");
+    long nProdCount=0;
+    for (auto & prod:def::vProducts)
+    {
+        Fl_Counter* pCounter= new Fl_Counter(700+(nProdCount*100), 40 , 100, 20);
+        pCounter->label(def::mapeProductNames.at(prod).c_str());
+        pCounter->value(1.0);
+        m_sInitPrices.m_mapProd_cInitPrice[prod] = pCounter;
+        nProdCount++;
+
+    }
+    //
 
     m_pWindow->end();
     m_pWindow->show();
