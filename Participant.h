@@ -33,9 +33,18 @@ public:
 
 
     //Satisfaction:
-    double GetSatisfactionOfProduct(def::eProduct eprod) const;
+    double GetSatisfactionOfProduct(def::eProduct eprod) const; //Debería sustituir este por el siguiente
     //TODO el método deberíaa tener un CStock te argumento en el futuro, porque la satisfacción de un producto dependerá de los que ya se tienen
+    static double GetSatisfactionOfStock(const CStock* pStock,std::map<def::eProduct, double> mapeProd_dSatisf);
     double GetSatisfactionOfStock(const CStock* pStock) const;
+    double GetSatisfactionOfStockWithCategories(const CStock* pStock) const;
+    double GetSatisfactionOfStockWithCategories2(const CStock* pStock) const;
+
+    //TODO En el futuro hacer un método que teenga en cuenta categorias
+    static double GetDiminishingReturnsFactor(double dQuantity);
+    static double GetSatisfactionOfStockWithCategories(const CStock* pStock,std::map<def::eProduct, double> mapeProd_dSatisf);
+    static double GetSatisfactionOfStockWithCategories2(const CStock* pStock,std::map<def::eProduct, double> mapeProd_dSatisf);
+    //
 
     void SetProductSatisfactionMap(std::map<def::eProduct, double> mapeProd_dSatisf)
     {

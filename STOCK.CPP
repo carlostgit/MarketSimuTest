@@ -253,10 +253,11 @@ void CStock::AddAmountForEachProd(double dAmount)
     }
 }
 
-void CStock::AddAmount(def::eProduct product, double dAmount)
+CStock& CStock::AddAmount(def::eProduct product, double dAmount)
 {
     assert(m_mapeProd_dAmount.end()!=m_mapeProd_dAmount.find(product));
     m_mapeProd_dAmount.at(product)+=dAmount;
+    return (*this);
 }
 
 
@@ -282,6 +283,33 @@ bool CStock::IsEnoughToSell(CStock* ostockProdsToOffer)
         return false;
     else
         return true;
+}
+
+std::map<def::eCategory, double> CStock::GetAmountPerCategory() const
+{
+    std::map<def::eCategory, double> mapCateg_dAmountOfProd;
+    for(auto & eCat:def::vCategories)
+    {
+        double dAmount = 0.0;
+        for (auto & eProd:def::mapCat_setProds.at(eCat))
+        {
+            dAmount += this->GetAmount(eProd);
+        }
+        mapCateg_dAmountOfProd[eCat] = dAmount;
+    }
+
+    return mapCateg_dAmountOfProd;
+}
+
+double CStock::GetAmountOfCategory(def::eCategory eCat) const
+{
+    double dAmount = 0.0;
+    for (auto & eProd:def::mapCat_setProds.at(eCat))
+    {
+        dAmount += this->GetAmount(eProd);
+    }
+
+    return dAmount;
 }
 
 const void CStock::PrintInfo()

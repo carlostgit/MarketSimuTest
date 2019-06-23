@@ -35,11 +35,14 @@ public:
     double GetSumOfAbs();
     void Set(def::eProduct eprod, double dAmount){m_mapeProd_dAmount[eprod]=dAmount;}
     void AddAmountForEachProd(double dAmount);
-    void AddAmount(def::eProduct product, double dAmount);
+    CStock& AddAmount(def::eProduct product, double dAmount);
     void SetAmountForEachProd(double dAmount);
     void SetAmount(def::eProduct product, double dAmount);
 
     bool IsEnoughToSell(CStock* ostockProdsToOffer);
+
+    std::map<def::eCategory, double> GetAmountPerCategory() const;
+    double GetAmountOfCategory(def::eCategory eCat) const;
 
     //Printing methods
     const void PrintInfo();

@@ -87,6 +87,40 @@ void CMainDialog::StructCalculator::CalcSatisf()
     //Carga de datos
     TestMarketWithParticipant testMarket(this);
     m_pBoxOfResults->label("TODO: Tengo que cambiar lo de GetSatisfactionOfProduct");
+
+    CStock stock;
+    for (auto & pairProd_Counter:m_mapProd_CounterStock)
+    {
+        def::eProduct eProd = pairProd_Counter.first;
+        double dValue = pairProd_Counter.second->value();
+
+        stock.AddAmount(eProd,dValue);
+    }
+
+    std::map<def::eProduct, double> mapeProd_dSatisf;
+    for (auto & pairProd_Counter:m_mapProd_CounterSatisfaction)
+    {
+        def::eProduct eProd = pairProd_Counter.first;
+        double dValue = pairProd_Counter.second->value();
+        mapeProd_dSatisf[eProd]=dValue;
+
+    }
+    double dSatisfOfStock = CParticipant::GetSatisfactionOfStock(&stock,mapeProd_dSatisf);
+    double dSatisfOfStockCateg = CParticipant::GetSatisfactionOfStockWithCategories(&stock,mapeProd_dSatisf);
+
+    double dSatisfOfStockCateg2 = CParticipant::GetSatisfactionOfStockWithCategories2(&stock,mapeProd_dSatisf);
+
+//    stock.PrintInfo();
+//    for (auto& pairP_Sat:mapeProd_dSatisf)
+//    {
+//        std::cout<<def::mapeProductNames.at(pairP_Sat.first)<<std::endl;
+//        std::cout<<std::to_string(pairP_Sat.second)<<std::endl;
+//    }
+
+    static std::string sSatisfOfProd = "0";
+    //sSatisfOfProd = std::to_string(dSatisfOfStock);
+    sSatisfOfProd = std::to_string(dSatisfOfStockCateg2);
+    m_pBoxOfResults->label(sSatisfOfProd.c_str());
 }
 
 void CMainDialog::StructCalculator::CalcConsumpt(Fl_Widget* w, void* pvoidStructCalculator)

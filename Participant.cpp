@@ -7,6 +7,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
+#include <functional>
 
 #include "Tester.h"
 
@@ -192,6 +194,13 @@ CStock CParticipant::DemandProducts2(const CPricesInfo* pricinfoPrices, const CS
     //de tal forma que si sobran los recursos se tienda a demandar productos de más categoría para maximizar la satisfacción
     //
 
+    //De momento, defino aquí la función de satisfacción que voy a usar en el algoritmo
+    //std::function<double (const CParticipant&,const CStock*)> GetSatisfOfStockFunction = &CParticipant::GetSatisfactionOfStockWithCategories2;
+    std::function<double (const CStock*)> GetSatisfOfStockFunction = [&](const CStock* stock){
+        return this->GetSatisfactionOfStockWithCategories2(stock);
+    };
+    //
+
     CStock stockToBuy;
 
     def::eProduct epPurchaseCurrency=def::PROD_GOLD;
@@ -205,10 +214,10 @@ CStock CParticipant::DemandProducts2(const CPricesInfo* pricinfoPrices, const CS
     CStock stockProductsToBuy;
     double dAmountOfMoney = pStockAfterSaleOfPartic->GetAmount(*pProdPurchaseCurrency);
     double dRemainingMoney=dAmountOfMoney;
-    bool bFinish=false;
-    while (!bFinish)
+    bool bMoneyFinished=false;
+    while (!bMoneyFinished)
     {
-        def::eProduct eProdCandidate=def::vProducts.front();
+        //def::eProduct eProdCandidate = def::vProducts.front();
         bool bCanBuyAnyProduct=false;
 
         double dMaxSatisfPerCost=0.0;
@@ -227,17 +236,14 @@ CStock CParticipant::DemandProducts2(const CPricesInfo* pricinfoPrices, const CS
             {
                 //satisf per cost
                 double dProdSatisf = m_mapeProd_dSatisf.at(prod);
-//                double dSatisfPerCost = dProdSatisf/dPriceOfProd;
-//                if (dSatisfPerCost>dMaxSatisfPerCost)
-//                    epSelectectProd=prod;
                 const CStock& stockWithoutCandidate = stockProductsToBuy;
                 CStock stockWithCandidate=stockProductsToBuy;
                 stockWithCandidate.AddAmount(prod,1.0);
 
                 //todo
 
-                double dSatisfWithoutCandidate = GetSatisfactionOfStock(&stockWithoutCandidate);
-                double dSatisfWithCandidate = GetSatisfactionOfStock(&stockWithCandidate);
+                double dSatisfWithoutCandidate = GetSatisfOfStockFunction(&stockWithoutCandidate);
+                double dSatisfWithCandidate = GetSatisfOfStockFunction(&stockWithCandidate);
                 double dSatisfPerCost = (dSatisfWithCandidate-dSatisfWithoutCandidate)/dPriceOfProd;
 
                 if (dSatisfPerCost>dMaxSatisfPerCost)
@@ -246,92 +252,89 @@ CStock CParticipant::DemandProducts2(const CPricesInfo* pricinfoPrices, const CS
                     epSelectectProd=prod;
                 }
 
-
-////                double GetSatisfactionOfStock(stockWithCandidate)
-////                {
-////                    satisf
-////                    for(stockWithCandidate.GetMap())
-////                    {
-////                        satisfA= numOfAProds*m_mapeProd_dSatisf.at(prodA);
-////                        satisfB= ...
-////
-////                        Satisf = satisfA + satisfB + satisfC + (satisfA*satisfB + satisfA*satisfC + satisfB*satisfC)/(satisfA + satisfB + satisfC);
-////                    }
-////                 }
-//                satifWithCandi
-//                for(stockWithoutCandidate.GetMap())
-//                {
-//                    ...
-//                    SatisfWithCandi = satisfA + satisfB + satisfC + (satisfA*satisfB + satisfA*satisfC + satisfB*satisfC)/(satisfA + satisfB + satisfC);
-//                }
-//                //satisfPerCost = (satifWithCandi-Satisf)/dPriceOfCandi;
-//                if satisfPerCost>maxSatisfPerCost
-//                    epSelectedProd=prod;
-//
-//
             }
 
         }
 
         if (false==bCanBuyAnyProduct)
         {
-            bFinish=true;
+            bMoneyFinished=true;
+
+            CStock stockWithCandidate=stockProductsToBuy;
         }
         else
         {
-            stockProductsToBuy.AddAmount(eProdCandidate,1.0);
+            stockProductsToBuy.AddAmount(epSelectectProd,1.0);
         }
 
     }
 
-//    std::ofstream myOfStream;
-//    if(PRINT)
-//    {
-//        myOfStream.open("CParticipant_DemandProducts.txt");
-//    }
-//
-//    def::eProduct eprodToBuy = *(std::max_element(vProds.begin(),vProds.end(),[&](def::eProduct peprodA, def::eProduct peprodB)
-//        {//Max satisfaction per $ function
-//            def::eProduct prodA=(peprodA);
-//            def::eProduct prodB=(peprodB);
-//            double dValueA = this->GetSatisfactionOfProduct(prodA);
-//            double dValueB = this->GetSatisfactionOfProduct(prodB);
-//            double dPriceA = pricinfoPrices->GetPrice((*pProdPurchaseCurrency),prodA);
-//            double dPriceB = pricinfoPrices->GetPrice((*pProdPurchaseCurrency),prodB);
-//            double dValuePerPriceA = dValueA/dPriceA;
-//            double dValuePerPriceB = dValueB/dPriceB;
-//
-//            if (PRINT)
-//            {
-//                myOfStream << "dValuePerPriceA " << def::mapeProductNames.at(prodA) << " " <<dValuePerPriceA<< "\n";
-//                myOfStream << "dValuePerPriceB " << def::mapeProductNames.at(prodB) << " " <<dValuePerPriceB<< "\n";
-//            }
-//
-//            return dValuePerPriceA<dValuePerPriceB;
-//        }
-//        ));
-//
-//        //TODO: sustituir lo anterior por algo como lo siguiente
-//        //FMaxSatisfactinPerCost functMaxSati(this, pricinfoPrices);
-//    //def::eProduct eprodToBuy = *(std::max_element(vProds.begin(),vProds.end(),functMaxSati));
-//
-//    double dPriceOfProdToBuy = pricinfoPrices->GetPrice((*pProdPurchaseCurrency),eprodToBuy);
-//    double dAmountOfMoney = pStockAfterSaleOfPartic->GetAmount(*pProdPurchaseCurrency);
-//
-//    long nAmountOfProductsToBuy = dAmountOfMoney/dPriceOfProdToBuy;
-//
-//    CStock stockToBuy;
-//    stockToBuy.Set(eprodToBuy, nAmountOfProductsToBuy);
-//
-//    if(PRINT)
-//    {
-//        myOfStream << "eprodToBuy " << def::mapeProductNames.at(eprodToBuy) << " " <<nAmountOfProductsToBuy<< "\n";
-//
-//        myOfStream.close();
-//    }
-//
-//    //TODO: En el futuro el método debería ir haciendo sl stock demandado unidad a unidad,
-//    //porque el método GetSatisfactionOfProduct dependerá del Stock. (El Stock actual + el stock que se está demandando)
+    CStock stockBeforeChange = stockToBuy;
+
+    //Metodo de cambiar unos productos por otros para intentar mejorar la satisfacción
+
+    CStock stockWithChange = stockBeforeChange;
+
+    //Ahora se prueba a cambiar unos productos por otros
+    bool bAnyGoodChangeFound = false;
+    do
+    {
+        const CStock stockWithChangeConst = stockWithChange;
+
+        //dRemainingMoney
+        for(auto & prodToBeAdded: def::vProducts)
+        {
+            //std::map<def::eProduct,dAmount> mapProd_AmountToRemove;
+
+            double dSatisfWithoutChange = GetSatisfOfStockFunction(&stockWithChangeConst);
+
+            CStock stockWithProd = stockWithChangeConst;
+            stockWithProd.AddAmount(prodToBeAdded,1.00);
+
+            const double dPriceOfProdToBeAdded = pricinfoPrices->GetPrice(epPurchaseCurrency,prodToBeAdded);
+            const double dRemainingMoneyWithProd = dRemainingMoney - dPriceOfProdToBeAdded; //Tendrá q ser negativo
+
+            const double dSatisfWithProd = GetSatisfOfStockFunction(&stockWithProd);
+
+            for(auto & prodToBeRemoved: def::vProducts)
+            {
+                if(prodToBeAdded==prodToBeRemoved)
+                    continue;
+
+                if(stockWithChange.GetAmount(prodToBeRemoved) < 1.0)
+                    continue;
+
+                const double dPriceOfProdToBeRemoved = pricinfoPrices->GetPrice(epPurchaseCurrency,prodToBeRemoved);
+
+                CStock stockWithChangeTemp = stockWithChange;
+                double dRemainingMoneyWithChange = dRemainingMoneyWithProd;
+                while (dRemainingMoneyWithChange < 0 && stockWithChangeTemp.GetAmount(prodToBeRemoved) > 1.0)
+                {
+                    stockWithChangeTemp = stockWithChange.AddAmount(prodToBeRemoved,-1.0);
+                    dRemainingMoneyWithChange = dRemainingMoneyWithProd + dPriceOfProdToBeRemoved;
+                }
+
+                if(dRemainingMoneyWithChange<0.0)
+                    continue; //
+                else
+                {
+                    double dSatisfWithChange = GetSatisfOfStockFunction(&stockWithChangeTemp);
+                    if (dSatisfWithChange > dSatisfWithoutChange)
+                    {
+                        stockWithChange = stockWithChangeTemp;
+                        bAnyGoodChangeFound = true;
+                        break;
+                    }
+                }
+            }
+            if(bAnyGoodChangeFound)
+                break;
+        }
+        if(bAnyGoodChangeFound)
+            break;
+
+    }while ( bAnyGoodChangeFound );
+
 
     return stockToBuy;
 }
@@ -380,8 +383,12 @@ double CParticipant::GetSatisfactionOfProduct(def::eProduct eprod) const
 
 double CParticipant::GetSatisfactionOfStock(const CStock* pStock) const
 {
-    double dSatisf=0.0;
+    return GetSatisfactionOfStock(pStock,m_mapeProd_dSatisf);
+}
 
+double CParticipant::GetSatisfactionOfStock(const CStock* pStock, std::map<def::eProduct, double> mapeProd_dSatisf)
+{
+    double dSatisf=0.0;
 
     std::vector<std::pair<def::eProduct,def::eProduct>> vpairProdA_ProdB;
 
@@ -389,18 +396,24 @@ double CParticipant::GetSatisfactionOfStock(const CStock* pStock) const
     {
         def::eProduct prodA=def::vProducts.at(indexA);
 
-        for (int indexB=indexA;indexB<def::vProducts.size();indexB++)
+        for (int indexB=indexA+1;indexB<def::vProducts.size();indexB++)
         {
             def::eProduct prodB=def::vProducts.at(indexB);
             vpairProdA_ProdB.push_back(std::make_pair(prodA,prodB));
         }
     }
 
+    std::cout<<"vpairProdA_ProdB.size()"<<vpairProdA_ProdB.size() << std::endl;
+    for (auto & pairA_B:vpairProdA_ProdB)
+    {
+        std::cout<<"pairA_B.first"<<pairA_B.first << std::endl;
+        std::cout<<"pairA_B.second"<<pairA_B.second << std::endl;
+    }
 
     std::map<def::eProduct, double> mapProd_Satisf;
     for (auto & prod:def::vProducts)
     {
-        mapProd_Satisf[prod]=pStock->GetAmount(prod)*m_mapeProd_dSatisf.at(prod);
+        mapProd_Satisf[prod]=pStock->GetAmount(prod)*mapeProd_dSatisf.at(prod);
     }
 
     double dSatisfSum=0.0;
@@ -409,18 +422,27 @@ double CParticipant::GetSatisfactionOfStock(const CStock* pStock) const
         dSatisfSum += pairProdSatisf.second;
     }
 
+    std::cout<<"dSatisfSum"<<dSatisfSum << std::endl;
+
     double dSatisfSumOfPairProducts=0.0;
     for(auto& pairProdA_ProdB:vpairProdA_ProdB)
     {
         auto prodA = pairProdA_ProdB.first;
-        double dSatisfPerA = m_mapeProd_dSatisf.at(prodA);
+        double dSatisfPerA = mapeProd_dSatisf.at(prodA);
         auto prodB = pairProdA_ProdB.second;
-        double dSatisfPerB = m_mapeProd_dSatisf.at(prodB);
+        double dSatisfPerB = mapeProd_dSatisf.at(prodB);
 
-        dSatisfSumOfPairProducts += prodA*dSatisfPerA*prodB*dSatisfPerB;
+        dSatisfSumOfPairProducts += pStock->GetAmount(prodA)*dSatisfPerA*pStock->GetAmount(prodB)*dSatisfPerB;
     }
 
+    std::cout<<"dSatisfSumOfPairProducts"<<dSatisfSumOfPairProducts<< std::endl;
+
+
     dSatisf = dSatisfSum + dSatisfSumOfPairProducts/dSatisfSum;
+
+    std::cout<<"dSatisf"<<dSatisf<< std::endl;
+
+    return dSatisf;
 
     //Satisf = satisfA + satisfB + satisfC + (satisfA*satisfB + satisfA*satisfC + satisfB*satisfC)/(satisfA + satisfB + satisfC);
     //Satisf = satisfSum + satisfSumOfPairProducts/satisfSum
@@ -428,6 +450,297 @@ double CParticipant::GetSatisfactionOfStock(const CStock* pStock) const
 //    }
 }
 
+double CParticipant::GetDiminishingReturnsFactor(double dQuantity)
+{
+    //Este método es candidato a meterse en una clase aparte
+    //Voy a llamar al termino "1-(1/(0.25*x+1)^2)" Diminishing Returns Factor
+    double dDenominatorSquareRoot = (0.25*dQuantity+1.0);
+    double dDenominator = dDenominatorSquareRoot*dDenominatorSquareRoot;
+    double dResult = 1.0 - (1.0/dDenominator);
+    return dResult;
+}
+
+double CParticipant::GetSatisfactionOfStockWithCategories2(const CStock* pStock) const
+{
+    return GetSatisfactionOfStockWithCategories2(pStock,m_mapeProd_dSatisf);
+}
+
+double CParticipant::GetSatisfactionOfStockWithCategories(const CStock* pStock) const
+{
+    return GetSatisfactionOfStockWithCategories(pStock,m_mapeProd_dSatisf);
+}
+
+double CParticipant::GetSatisfactionOfStockWithCategories2(const CStock* pStock,std::map<def::eProduct, double> mapeProd_dSatisf)
+{
+
+    //Mejor: satisf = 1-(1/(0.25*x+1)^2)
+    //donde x sería la cantidad. Esta ecuación tendría un máximo en 1, y tendría pendiente 1 en 0
+    //Es como una ecuación y = x, pero que se va haciendo más y más horizontal hasta q ya no crece la y
+
+    //Voy a llamar al termino "1-(1/(0.25*x+1)^2)" Diminishing Returns Factor
+    //DiminishingReturnsFactor = DimRetFactor
+
+    //QuantSatisfCatA = QuantCteCatA*(1-(1/(0.25*NumProdCatA+1)^2))
+    //O sea: QuantSatisfCatA = QuantCteCatA*DimRetFactor
+    //QualSatisfCatA = QualCte*((NumProd1CatA*SatisfProd1CatA+NumProd2CatA*SatisfProd2Cata)/NumProdCatA)*(1-(1/(0.25*NumProdCatA+1)^2))
+    //Voy a llamar al termino "(NumProd1CatA*SatisfProd1CatA+NumProd2CatA*SatisfProd2Cata)/NumProdCatA" Average Quality Factor
+    //Average Quality Factor = AvQualFactor
+    //O sea: QualSatisfCatA = QualCte*AvQualFactor*DimRetFactor
+
+    //Quantity satisfaction:
+    std::set<double> setQuantSatisfPerCat;
+    std::map<def::eCategory, double> mapCateg_dQuantSatisf;
+    for(auto & eCat:def::vCategories)
+    {
+        double dQuantConstOfCat = 100.0; //En el futuro dependerá del Participant y de la Category
+        double dAmountOfCat = pStock->GetAmountOfCategory(eCat);
+        mapCateg_dQuantSatisf[eCat] = dQuantConstOfCat*GetDiminishingReturnsFactor(dAmountOfCat);
+    }
+
+    double dQuantSatisf = 0.0;
+    for(auto & eCat:def::vCategories)
+    {
+        dQuantSatisf += mapCateg_dQuantSatisf.at(eCat);
+    }
+
+    //Quality satisfaction:
+
+    //Average Quality Factor = AvQualFactor
+
+    //"(NumProd1CatA*SatisfProd1CatA+NumProd2CatA*SatisfProd2Cata)/NumProdCatA"
+
+    std::map<def::eCategory,double> mapCat_QualSatisf;
+
+    for(auto & eCat:def::vCategories)
+    {
+        double dSumatoryOfSatisfOfProds = 0.0;
+        for (auto & eProd:def::mapCat_setProds.at(eCat))
+        {
+            double dSatisfOfProd = mapeProd_dSatisf.at(eProd);
+            double dAmountOfProd = pStock->GetAmount(eProd);
+            double dAmount_x_SatisfOfProd = dAmountOfProd*dSatisfOfProd;
+            dSumatoryOfSatisfOfProds += dAmount_x_SatisfOfProd;
+        }
+        double dAmountOfCat = pStock->GetAmountOfCategory(eCat);
+        double dAvQualFactor = dSumatoryOfSatisfOfProds/dAmountOfCat;
+        double dDimRetFactor = GetDiminishingReturnsFactor(dAmountOfCat);
+        double dQualConst = 100.0;
+        double dQualSatisfOfCat = dQualConst*dAvQualFactor*dDimRetFactor;
+
+        mapCat_QualSatisf[eCat] = dQualSatisfOfCat;
+    }
+
+    double dQualSatisf = 0.0;
+    for(auto & pairCat_QualSatisf:mapCat_QualSatisf)
+    {
+        dQualSatisf += pairCat_QualSatisf.second;
+    }
+
+    //Sum QuantitySatisf + QualSatisf
+
+    double dTotalSatisfaction = dQuantSatisf + dQualSatisf;
+
+    return dTotalSatisfaction;
+}
+
+double CParticipant::GetSatisfactionOfStockWithCategories(const CStock* pStock,std::map<def::eProduct, double> mapeProd_dSatisf)
+{
+    //Primar cantidad sobre calidad hasta conseguir una determinada cantidad de una categoría
+
+    //Con cantidades mayores primará la calidad sobre la cantidad, dentro de la categoría
+
+    //Limite de satisfacción por cantidad. A partir de una cantidad (en una categoría) no puede aumentar la satisfacción
+
+    //Implementación sencilla:
+    //(Lo malo de esta implementación es que la satisfacción baja a partir de cierto número de productos, en vez de mantenerse constante)
+
+    //SatisfBecauseQuantity = CatASatisfQuantity + CatBSatisfQuantity;
+    //CatASatisfQuantity = QuantCteCatA*NumProdCatA - (NumProdCatA^2)
+
+    //SatisfBecauseQuality = satisfCatA + satisfCatB + satisfCatC + (satisfCatA*satisfCatB + satisfCatA*satisfCatC + satisfCatB*satisfCatC)/(satisfCatA + satisfCatB + satisfCatC);
+    //satisfCatA = QualCteCatA(NumProd1CatA*satisfProd1CatA + prod2CatA*satisfProd2CatA) - (NumProdCatA^2)
+
+    //Cambios para que los máximos se mantengan en vez de empezar a bajar:
+
+    //Buscar máximo de CatASatisfQuantity:
+    //El máximo creo que está con
+    //0 = QuantCteCatA - 2*NumProdCatA
+    //NumProdCatA=QuantCteCatA/2
+
+    //Buscar máximo de CatASatisfQuality para prod1 de CatA
+    //0 = QualCteCatA*satisfProd1CatA - 2*NumProdCatA
+    //NumProdCatA = QualCteCatA*satisfProd1CatA/2
+
+
+    //Investigar: satisf = 0.5-(1/(1+(x+1)^2))
+    //donde x sería la cantidad. Esta ecuación tendría un máximo en el 0.5
+
+    //Mejor: satisf = 1-(1/(0.25*x+1)^2)
+    //donde x sería la cantidad. Esta ecuación tendría un máximo en 1, y tendría pendiente 1 en 0
+    //Es como una ecuación y = x, pero que se va haciendo más y más horizontal hasta q ya no crece la y
+
+    //Voy a llamar al termino "1-(1/(0.25*x+1)^2)" Diminishing Returns Factor
+    //DiminishingReturnsFactor = DimRetFactor
+
+    //QuantSatisfCatA = QuantCteCatA*(1-(1/(0.25*NumProdCatA+1)^2))
+    //O sea: QuantSatisfCatA = QuantCteCatA*DimRetFactor
+    //QualSatisfCatA = QualCte*((NumProd1CatA*SatisfProd1CatA+NumProd2CatA*SatisfProd2Cata)/NumProdCatA)*(1-(1/(0.25*NumProdCatA+1)^2))
+    //Voy a llamar al termino "(NumProd1CatA*SatisfProd1CatA+NumProd2CatA*SatisfProd2Cata)/NumProdCatA" Average Quality Factor
+    //Median Quality Factor = AvQualFactor
+    //O sea: QualSatisfCatA = QualCte*AvQualFactor*DimRetFactor
+
+    //Todo: Cambiar el cálculo de satisfacción para hacerlo usando las formulas de DimRetFactor y AvQualFactor
+
+    //Amount of products per Category
+    std::map<def::eCategory, double> mapCateg_dAmountOfProd;
+    for(auto & eCat:def::vCategories)
+    {
+        double dAmount = 0.0;
+        for (auto & eProd:def::mapCat_setProds.at(eCat))
+        {
+            dAmount += pStock->GetAmount(eProd);
+        }
+        mapCateg_dAmountOfProd[eCat] = dAmount;
+    }
+
+    //amount of prods per cat
+    std::cout << "Amount of prods per category:" << std::endl;
+    for (auto & pairCatAmount:mapCateg_dAmountOfProd)
+        std::cout << def::mapCategoryNames.at(pairCatAmount.first) << ": " << pairCatAmount.second << std::endl;
+    //
+
+    //First: Quantity Satisfaction
+    double dQuantitySatisfaction = 0.0;
+    {
+        //Param of quantity satisfaction per category
+        std::map<def::eCategory, double> mapCateg_dQuantSatisfCte;
+        for(auto & eCat:def::vCategories)
+        {
+            mapCateg_dQuantSatisfCte[eCat] = 100;
+        }
+
+        //Quantity satisfaction calculation per category
+        std::map<def::eCategory, double> mapCateg_dQuantSatisf;
+        for(auto & eCat:def::vCategories)
+        {
+            double dCatQuantSatisf = 0.0;
+            double dAmountPow2 = mapCateg_dAmountOfProd.at(eCat)*mapCateg_dAmountOfProd.at(eCat);
+            dCatQuantSatisf = mapCateg_dQuantSatisfCte.at(eCat)*mapCateg_dAmountOfProd.at(eCat) - dAmountPow2;
+
+            if (dCatQuantSatisf > 0.0)
+                mapCateg_dQuantSatisf[eCat] = dCatQuantSatisf;
+            else
+                mapCateg_dQuantSatisf[eCat] = 0.0;
+        }
+
+        //quant satisf per cat
+        std::cout << "Quant satisf per category:" << std::endl;
+        for (auto & pairCatAmount:mapCateg_dQuantSatisf)
+            std::cout << def::mapCategoryNames.at(pairCatAmount.first) << ": " << pairCatAmount.second << std::endl;
+        //
+
+        //Quantity satisfaction:
+        for (auto & pairCat_QuantSatisf:mapCateg_dQuantSatisf)
+        {
+            dQuantitySatisfaction += pairCat_QuantSatisf.second;
+        }
+
+        //qual satisf per cat
+        std::cout << "dQuantitySatisfaction: " << dQuantitySatisfaction << std::endl;
+
+        //
+        //
+    }
+
+
+    //Second: Quality Satisfaction
+    double dQualitySatisfaction = 0.0;
+    {
+
+
+        //satisfCatA = QualCteCatA(NumProd1CatA*satisfProd1CatA + prod2CatA*satisfProd2CatA) - (NumProdCatA^2)
+
+        //Param of quality satisfaction per category
+        std::map<def::eCategory, double> mapCateg_dQualSatisfCte;
+        for(auto & eCat:def::vCategories)
+        {
+            mapCateg_dQualSatisfCte[eCat] = 100;
+        }
+
+        //Quality satisfaction per category
+        std::map<def::eCategory, double> mapCateg_dQualSatisf;
+        for(auto & eCat:def::vCategories)
+        {
+            double dParamQualCatCte = mapCateg_dQualSatisfCte.at(eCat);
+            double dSumProdAmountXSatisfOfProd = 0.0;
+            for (auto & eProd:def::mapCat_setProds.at(eCat))
+            {
+                dSumProdAmountXSatisfOfProd += pStock->GetAmount(eProd)*mapeProd_dSatisf.at(eProd);
+            }
+
+            double dCatQualSatisf = 0.0;
+            double dAmountPow2 = mapCateg_dAmountOfProd.at(eCat)*mapCateg_dAmountOfProd.at(eCat);
+
+            dCatQualSatisf  = dParamQualCatCte*dSumProdAmountXSatisfOfProd - dAmountPow2;
+
+            if (dCatQualSatisf > 0.0)
+                mapCateg_dQualSatisf[eCat] = dCatQualSatisf;
+            else
+                mapCateg_dQualSatisf[eCat] = 0.0;
+        }
+
+        //qual satisf per cat
+        std::cout << "Qual satisf per category:" << std::endl;
+        for (auto & pairCatAmount:mapCateg_dQualSatisf)
+            std::cout << def::mapCategoryNames.at(pairCatAmount.first) << ": " << pairCatAmount.second << std::endl;
+        //
+
+        //Quality satisfaction
+        //SatisfBecauseQuality = satisfCatA + satisfCatB + satisfCatC + (satisfCatA*satisfCatB + satisfCatA*satisfCatC + satisfCatB*satisfCatC)/(satisfCatA + satisfCatB + satisfCatC);
+        //SatisfBecauseQuality = dSumQualitySatisf + (dSumOfPairCatProdsOfQualitySatisf)/dSumQualitySatisf;
+
+        double dSumQualitySaisf=0.0;
+        for (auto & pairCat_QualSatisf:mapCateg_dQualSatisf)
+        {
+            dSumQualitySaisf += pairCat_QualSatisf.second;
+        }
+
+        //Esto igual podría estar precalculado en el defines o así:
+        std::vector<std::pair<def::eCategory,def::eCategory>> vpairCatA_CatB;
+        for (int indexA=0;indexA<def::vCategories.size();indexA++)
+        {
+            def::eCategory catA=def::vCategories.at(indexA);
+
+            for (int indexB=indexA+1;indexB<def::vCategories.size();indexB++)
+            {
+                def::eCategory catB=def::vCategories.at(indexB);
+                vpairCatA_CatB.push_back(std::make_pair(catA,catB));
+            }
+        }
+
+        double dSumOfCatASatisf_X_CatBSatisf = 0.0;
+        for (auto & pairCatA_CatB:vpairCatA_CatB)
+        {
+            def::eCategory catA = pairCatA_CatB.first;
+            def::eCategory catB = pairCatA_CatB.second;
+
+            dSumOfCatASatisf_X_CatBSatisf += mapCateg_dQualSatisf[catA]*mapCateg_dQualSatisf[catB];
+        }
+
+        dQualitySatisfaction = dSumQualitySaisf + dSumOfCatASatisf_X_CatBSatisf/dSumQualitySaisf;
+
+        //qual satisf per cat
+        std::cout << "dQualitySatisfaction: " << dQualitySatisfaction << std::endl;
+
+
+
+    }
+
+
+    double dTotalSatisfaction = dQuantitySatisfaction + dQualitySatisfaction;
+
+    return dTotalSatisfaction;
+}
 
 void CParticipant::AddProductsForNextCycle(CStock stock)
 {
